@@ -1,11 +1,23 @@
-write-host 'Please complete both credential checks'
+Write-Host 'Please complete both credential checks'
+
+# Check if the CredentialManager module is installed
+$CredentialManagerInstalled = Get-Module -ListAvailable -Name CredentialManager
+
+if ($CredentialManagerInstalled) {
+    Write-Host 'Credential Manager has been found. Skipping Login'
+    $CredentialName = "MyExchangeOnlineCredential"
+    $Credential = Get-StoredCredential -Target $CredentialName
+} else {
+    $Credential = Get-Credential
+}
+
 # Check if the MSOnline module is installed, and install it if necessary
 if (-not (Get-Module -ListAvailable -Name MSOnline)) {
     Install-Module -Name MSOnline -Scope CurrentUser -Force
 }
 
 # Connect to Microsoft 365 tenant
-Connect-MsolService
+Connect-MsolService -Credential $Credential
 
 # Check if the ExchangeOnlineManagement module is installed, and install it if necessary
 if (-not (Get-Module -ListAvailable -Name ExchangeOnlineManagement)) {
@@ -13,7 +25,27 @@ if (-not (Get-Module -ListAvailable -Name ExchangeOnlineManagement)) {
 }
 
 # Connect to Exchange Online
-Connect-ExchangeOnline -ShowBanner:$false
+Connect-ExchangeOnline -Credential $Credential -ShowBanner:$false
+
+function Show-LoadingBar {
+    param (
+        [int]$DurationInSeconds = 10,
+        [string]$Message = "Processing..."
+    )
+
+    $ProgressMax = 100
+    $Interval = ($DurationInSeconds * 1000) / $ProgressMax
+
+    Write-Host ""
+
+    for ($i = 0; $i -le $ProgressMax; $i++) {
+        $ProgressBar = ('=' * $i) + (' ' * ($ProgressMax - $i))
+        Write-Host -NoNewline "`r$Message [$ProgressBar] $i%"
+        Start-Sleep -Milliseconds $Interval
+    }
+
+    Write-Host ""
+}
 
 function OnboardEmployee {
 
@@ -182,6 +214,8 @@ function PullDistributionList {
             }
         }
     }
+    Write-Host "Saving List to DistributionGroupsAndMembers CSV File"
+    Show-LoadingBar -DurationInSeconds 10 -Message "Loading..."
     Write-Host "List Saved to DistributionGroupsAndMembers CSV File"
     # Export the result array to a CSV file, without type information and using UTF-8 encoding
     $Result | Export-Csv -Path "$PSScriptRoot\DistributionGroupsAndMembers.csv" -NoTypeInformation -Encoding UTF8
