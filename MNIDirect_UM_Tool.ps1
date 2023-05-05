@@ -1,156 +1,168 @@
-﻿# Ask the user if they would like to check for an update
-$checkForUpdate = Read-Host -Prompt "Would you like to check for an update? This will close the script after updating. Type 'yes' to update or 'no' to continue."
+﻿function SetConsoleAppearance {
+    # Set the desired background color
+    $backgroundColor = "Black"
 
-if ($checkForUpdate.ToLower() -eq 'yes') {
-    # Set GitHub API URL to get the latest version of your script
-    $apiUrl = "https://raw.githubusercontent.com/spartan129/MNI-Direct/main/MNIDirect_UM_Tool.ps1"
+    # Get the current console colors
+    $consoleColors = $Host.UI.RawUI.ForegroundColor, $Host.UI.RawUI.BackgroundColor
 
-    # Get the content of the script from GitHub
-    $githubScriptContent = Invoke-WebRequest -Uri $apiUrl -UseBasicParsing
+    # Set the new background color
+    $Host.UI.RawUI.BackgroundColor = $backgroundColor
 
-    # Check if the script content is not empty
-    if ($githubScriptContent -and $githubScriptContent.Content) {
-        $githubScriptContent = $githubScriptContent.Content
+    # Clear the console to apply the new background color
+    Clear-Host
 
-        # Get the path of the currently running script
-        $currentScriptPath = $MyInvocation.MyCommand.Path
+    # Set the desired window width and height
+    $windowWidth = 56
+    $windowHeight = 30
 
-        # Get the content of the currently running script
-        $currentScriptContent = Get-Content -Path $currentScriptPath -Raw
+    # Set the desired buffer width and height
+    $bufferWidth = 56
+    $bufferHeight = 2000
 
-        # Compare the content of the GitHub script and the current script
-        if ($currentScriptContent -ne $githubScriptContent) {
-            # Update the current script with the content of the GitHub script
-            Set-Content -Path $currentScriptPath -Value $githubScriptContent
+    # Get the current console window and buffer size
+    $currentWindowSize = $Host.UI.RawUI.WindowSize
+    $currentBufferSize = $Host.UI.RawUI.BufferSize
 
-            # Show a message that the script has been updated
-            Write-Host "The script has been updated to the latest version." -ForegroundColor Green
+    # Set the new console window and buffer size
+    $newWindowSize = $currentWindowSize
+    $newBufferSize = $currentBufferSize
 
-            # Close the script after updating
-            exit
+    $newWindowSize.Width = $windowWidth
+    $newWindowSize.Height = $windowHeight
+    $newBufferSize.Width = $bufferWidth
+    $newBufferSize.Height = $bufferHeight
+
+    $Host.UI.RawUI.WindowSize = $newWindowSize
+    $Host.UI.RawUI.BufferSize = $newBufferSize
+}
+
+function UpdateScript {
+    # Ask the user if they would like to check for an update
+    $checkForUpdate = Read-Host -Prompt "
+        Would you like to check for an update? 
+        This will close the script after updating. 
+        Type 'yes' to update or 'no' to continue"
+
+    if ($checkForUpdate.ToLower() -eq 'yes') {
+        # Set GitHub API URL to get the latest version of your script
+        $apiUrl = "https://raw.githubusercontent.com/spartan129/MNI-Direct/main/MNIDirect_UM_Tool.ps1"
+
+        # Get the content of the script from GitHub
+        $githubScriptContent = Invoke-WebRequest -Uri $apiUrl -UseBasicParsing
+
+        # Check if the script content is not empty
+        if ($githubScriptContent -and $githubScriptContent.Content) {
+            $githubScriptContent = $githubScriptContent.Content
+
+            # Get the path of the currently running script
+            $currentScriptPath = $MyInvocation.MyCommand.Path
+
+            # Get the content of the currently running script
+            $currentScriptContent = Get-Content -Path $currentScriptPath -Raw
+
+            # Compare the content of the GitHub script and the current script
+            if ($currentScriptContent -ne $githubScriptContent) {
+                # Update the current script with the content of the GitHub script
+                Set-Content -Path $currentScriptPath -Value $githubScriptContent
+
+                # Show a message that the script has been updated
+                Write-Host "The script has been updated to the latest version." -ForegroundColor Green
+
+                # Close the script after updating
+                exit
+            } else {
+                Write-Host "The script is already up-to-date." -ForegroundColor Green
+            }
         } else {
-            Write-Host "The script is already up-to-date." -ForegroundColor Green
+            Write-Host "Failed to retrieve the script content from GitHub." -ForegroundColor Red
+            exit
         }
-    } else {
-        Write-Host "Failed to retrieve the script content from GitHub." -ForegroundColor Red
     }
 }
 
-
-
-Write-Host 'Please complete both credential checks'
-
-# Check if the CredentialManager module is installed
-$CredentialManagerInstalled = Get-Module -ListAvailable -Name CredentialManager
-
-if ($CredentialManagerInstalled) {
-    Write-Host 'Credential Manager has been found. Skipping Login'
-    $CredentialName = "MyExchangeOnlineCredential"
-    $Credential = Get-StoredCredential -Target $CredentialName
-} else {
-    $Credential = Get-Credential
-}
-
-# Check if the MSOnline module is installed, and install it if necessary
-if (-not (Get-Module -ListAvailable -Name MSOnline)) {
-    Install-Module -Name MSOnline -Scope CurrentUser -Force
-}
-
-# Connect to Microsoft 365 tenant
-Connect-MsolService -Credential $Credential
-
-# Check if the ExchangeOnlineManagement module is installed, and install it if necessary
-if (-not (Get-Module -ListAvailable -Name ExchangeOnlineManagement)) {
-    Install-Module -Name ExchangeOnlineManagement -Scope CurrentUser -Force
-}
-
-# Connect to Exchange Online
-Connect-ExchangeOnline -Credential $Credential -ShowBanner:$false
-
-
 function OnboardEmployee {
 
-do {
+    do {
 
-	# Gather user information
-	$email = Read-Host -Prompt "Enter user's email address"
-	$branch = Read-Host -Prompt "Enter user's branch number (42, 43, 44, or 45)"
-	$position = Read-Host -Prompt "Enter user's position (Sales, Branch Manager, or Nursery Manager)"
-	$newPassword = 'Ch@ngeMe1!'
-	# Validate branch number
-	$validBranches = @(42, 43, 44, 45)
-	if (-not ($branch -in $validBranches)) {
-		Write-Host "Invalid branch number. Please provide a valid branch number (42, 43, 44, or 45)."
-		exit
-	}
+        # Gather user information
+        $email = Read-Host -Prompt "Enter user's email address"
+        $branch = Read-Host -Prompt "Enter user's branch number (42, 43, 44, or 45)"
+        $position = Read-Host -Prompt "Enter user's position (Sales, Branch Manager, or Nursery Manager)"
+        $newPassword = 'Ch@ngeMe1!'
+        # Validate branch number
+        $validBranches = @(42, 43, 44, 45)
+        if (-not ($branch -in $validBranches)) {
+            Write-Host "Invalid branch number. Please provide a valid branch number (42, 43, 44, or 45)."
+            exit
+        }
 
-	# Assign licenses based on position
-	$licenseMapping = @{
-		'Sales' = @('reseller-account:DYN365_BUSCENTRAL_ESSENTIAL', 'reseller-account:O365_BUSINESS_ESSENTIALS','reseller-account:POWER_BI_STANDARD','reseller-account:POWERAPPS_VIRAL')
-		'Branch Manager' = @('reseller-account:DYN365_BUSCENTRAL_ESSENTIAL', 'reseller-account:POWER_BI_STANDARD','reseller-account:O365_BUSINESS_PREMIUM','reseller-account:POWERAPPS_VIRAL')
-		'Nursery Manager' = @('reseller-account:DYN365_BUSCENTRAL_ESSENTIAL', 'reseller-account:POWER_BI_STANDARD','reseller-account:O365_BUSINESS_PREMIUM','reseller-account:POWERAPPS_VIRAL')
-	}
+        # Assign licenses based on position
+        $licenseMapping = @{
+            'Sales' = @('reseller-account:DYN365_BUSCENTRAL_ESSENTIAL', 'reseller-account:O365_BUSINESS_ESSENTIALS','reseller-account:POWER_BI_STANDARD','reseller-account:POWERAPPS_VIRAL')
+            'Branch Manager' = @('reseller-account:DYN365_BUSCENTRAL_ESSENTIAL', 'reseller-account:POWER_BI_STANDARD','reseller-account:O365_BUSINESS_PREMIUM','reseller-account:POWERAPPS_VIRAL')
+            'Nursery Manager' = @('reseller-account:DYN365_BUSCENTRAL_ESSENTIAL', 'reseller-account:POWER_BI_STANDARD','reseller-account:O365_BUSINESS_PREMIUM','reseller-account:POWERAPPS_VIRAL')
+        }
 
-	$assignedLicenses = $licenseMapping[$position]
+        $assignedLicenses = $licenseMapping[$position]
 
-	if (-not $assignedLicenses) {
-		Write-Host "Invalid position. Please provide a valid position (Sales, Branch Manager, or Nursery Manager)."
-		exit
-	}
+        if (-not $assignedLicenses) {
+            Write-Host "Invalid position. Please provide a valid position (Sales, Branch Manager, or Nursery Manager)."
+            exit
+        }
 
-	foreach ($license in $assignedLicenses) {
-		$userLicenses = (Get-MsolUser -UserPrincipalName $email).Licenses.AccountSkuId
-		if ($license -notin $userLicenses) {
-			Set-MsolUserLicense -UserPrincipalName $email -AddLicenses $license
-		} else {
-			Write-Host "User already has the $license license assigned. Skipping."
-		}
-	}
+        foreach ($license in $assignedLicenses) {
+            $userLicenses = (Get-MsolUser -UserPrincipalName $email).Licenses.AccountSkuId
+            if ($license -notin $userLicenses) {
+                Set-MsolUserLicense -UserPrincipalName $email -AddLicenses $license
+            } else {
+                Write-Host "User already has the $license license assigned. Skipping."
+            }
+        }
 
-Set-MsolUser -UserPrincipalName $email -BlockCredential $false
-Set-MsolUserPassword -UserPrincipalName $email -NewPassword $newPassword -ForceChangePassword $false
-	# Assign email groups based on position and branch number
-	$groupMapping = @{
-		'Sales' = @{
-			'42' = @('allstaff@mnidirect.com', 'purchasing-atl@mnidirect.com','branch42@mnidirect.com')
-			'43' = @('allstaff@mnidirect.com', 'br43purchasing@mnidirect.com','branch43@mnidirect.com')
-			'44' = @('allstaff@mnidirect.com', 'purchasing-atl@mnidirect.com','branch44@mnidirect.com')
-			'45' = @('allstaff@mnidirect.com', 'br45purchasing@mnidirect.com','branch45@mnidirect.com')
-		}
-		'Branch Manager' = @{
-			'42' = @('br42managers@mnidirect.com','allstaff@mnidirect.com', 'purchasing-atl@mnidirect.com','availability@mnidirect.com','safety@mnidirect.com','branch42@mnidirect.com','br42security@mnidirect.com')
-			'43' = @('br43managers@mnidirect.com','allstaff@mnidirect.com', 'br43purchasing@mnidirect.com','availability@mnidirect.com','safety@mnidirect.com','branch43@mnidirect.com','br43security@mnidirect.com')
-			'44' = @('br44managers@mnidirect.com','allstaff@mnidirect.com', 'purchasing-atl@mnidirect.com','availability@mnidirect.com','safety@mnidirect.com','branch44@mnidirect.com','br44security@mnidirect.com')
-			'45' = @('br45managers@mnidirect.com','allstaff@mnidirect.com', 'br45purchasing@mnidirect.com','availability@mnidirect.com','safety@mnidirect.com','branch45@mnidirect.com')
-		}
-		'Nursery Manager' = @{
-			'42' = @('br42managers@mnidirect.com','allstaff@mnidirect.com', 'purchasing-atl@mnidirect.com','availability@mnidirect.com','safety@mnidirect.com','branch42@mnidirect.com','br42security@mnidirect.com')
-			'43' = @('br43managers@mnidirect.com','allstaff@mnidirect.com', 'br43purchasing@mnidirect.com','availability@mnidirect.com','safety@mnidirect.com','branch43@mnidirect.com','br43security@mnidirect.com')
-			'44' = @('br44managers@mnidirect.com','allstaff@mnidirect.com', 'purchasing-atl@mnidirect.com','availability@mnidirect.com','safety@mnidirect.com','branch44@mnidirect.com','br44security@mnidirect.com')
-			'45' = @('br45managers@mnidirect.com','allstaff@mnidirect.com', 'br45purchasing@mnidirect.com','availability@mnidirect.com','safety@mnidirect.com','branch45@mnidirect.com')
-		}
-	}
-	$assignedGroups = $groupMapping[$position][$branch]
+    Set-MsolUser -UserPrincipalName $email -BlockCredential $false
+    Set-MsolUserPassword -UserPrincipalName $email -NewPassword $newPassword -ForceChangePassword $false
+        # Assign email groups based on position and branch number
+        $groupMapping = @{
+            'Sales' = @{
+                '42' = @('allstaff@mnidirect.com', 'purchasing-atl@mnidirect.com','branch42@mnidirect.com')
+                '43' = @('allstaff@mnidirect.com', 'br43purchasing@mnidirect.com','branch43@mnidirect.com')
+                '44' = @('allstaff@mnidirect.com', 'purchasing-atl@mnidirect.com','branch44@mnidirect.com')
+                '45' = @('allstaff@mnidirect.com', 'br45purchasing@mnidirect.com','branch45@mnidirect.com')
+            }
+            'Branch Manager' = @{
+                '42' = @('br42managers@mnidirect.com','allstaff@mnidirect.com', 'purchasing-atl@mnidirect.com','availability@mnidirect.com','safety@mnidirect.com','branch42@mnidirect.com','br42security@mnidirect.com')
+                '43' = @('br43managers@mnidirect.com','allstaff@mnidirect.com', 'br43purchasing@mnidirect.com','availability@mnidirect.com','safety@mnidirect.com','branch43@mnidirect.com','br43security@mnidirect.com')
+                '44' = @('br44managers@mnidirect.com','allstaff@mnidirect.com', 'purchasing-atl@mnidirect.com','availability@mnidirect.com','safety@mnidirect.com','branch44@mnidirect.com','br44security@mnidirect.com')
+                '45' = @('br45managers@mnidirect.com','allstaff@mnidirect.com', 'br45purchasing@mnidirect.com','availability@mnidirect.com','safety@mnidirect.com','branch45@mnidirect.com')
+            }
+            'Nursery Manager' = @{
+                '42' = @('br42managers@mnidirect.com','allstaff@mnidirect.com', 'purchasing-atl@mnidirect.com','availability@mnidirect.com','safety@mnidirect.com','branch42@mnidirect.com','br42security@mnidirect.com')
+                '43' = @('br43managers@mnidirect.com','allstaff@mnidirect.com', 'br43purchasing@mnidirect.com','availability@mnidirect.com','safety@mnidirect.com','branch43@mnidirect.com','br43security@mnidirect.com')
+                '44' = @('br44managers@mnidirect.com','allstaff@mnidirect.com', 'purchasing-atl@mnidirect.com','availability@mnidirect.com','safety@mnidirect.com','branch44@mnidirect.com','br44security@mnidirect.com')
+                '45' = @('br45managers@mnidirect.com','allstaff@mnidirect.com', 'br45purchasing@mnidirect.com','availability@mnidirect.com','safety@mnidirect.com','branch45@mnidirect.com')
+            }
+        }
+        $assignedGroups = $groupMapping[$position][$branch]
 
-	if ($assignedGroups) {
-		foreach ($group in $assignedGroups) {
-			$groupMembers = Get-DistributionGroupMember -Identity $group | Select-Object -ExpandProperty PrimarySmtpAddress
-			if ($email -notin $groupMembers) {
-				Add-DistributionGroupMember -Identity $group -Member $email
-			} else {
-				Write-Host "User is already a member of the $group group. Skipping."
-			}
-		}
-	}
-	else {
-		Write-Host "Invalid position or branch number. Please provide valid inputs."
-		exit
-	}
+        if ($assignedGroups) {
+            foreach ($group in $assignedGroups) {
+                $groupMembers = Get-DistributionGroupMember -Identity $group | Select-Object -ExpandProperty PrimarySmtpAddress
+                if ($email -notin $groupMembers) {
+                    Add-DistributionGroupMember -Identity $group -Member $email
+                } else {
+                    Write-Host "User is already a member of the $group group. Skipping."
+                }
+            }
+        }
+        else {
+            Write-Host "Invalid position or branch number. Please provide valid inputs."
+            exit
+        }
 
-	Write-Host "User onboarding process completed successfully."
+        Write-Host "User onboarding process completed successfully."
 
-	$continueOnboarding = Read-Host -Prompt "Would you like to onboard another employee? (Y/N)"
-} while ($continueOnboarding -eq 'Y' -or $continueOnboarding -eq 'y')
+        $continueOnboarding = Read-Host -Prompt "Would you like to onboard another employee? (Y/N)"
+    } while ($continueOnboarding -eq 'Y' -or $continueOnboarding -eq 'y')
 Write-Host "Onboarding complete."
 Read-Host -Prompt "Press any key to continue..."
 }
@@ -158,58 +170,56 @@ Read-Host -Prompt "Press any key to continue..."
 # Define offboarding function
 function OffboardEmployee {
 
-do {
-    # Prompt for user email and new password
-    $userEmail = Read-Host -Prompt "Enter the email address of the user to be offboarded"
-    $newPassword = Read-Host -Prompt "Enter the new password for the user"
+    do {
+        # Prompt for user email and new password
+        $userEmail = Read-Host -Prompt "Enter the email address of the user to be offboarded"
+        $newPassword = Read-Host -Prompt "Enter the new password for the user"
 
-    # Display the username and password for confirmation
-    Write-Host "Please confirm the following information:"
-    Write-Host "User email: $userEmail"
-    Write-Host "New password: $newPassword"
+        # Display the username and password for confirmation
+        Write-Host "Please confirm the following information:"
+        Write-Host "User email: $userEmail"
+        Write-Host "New password: $newPassword"
 
-    # Ask for confirmation before proceeding
-    $confirmation = Read-Host -Prompt "To proceed with offboarding, type 'Y'"
-    if ($confirmation -eq "Y" -or $confirmation -eq "y") {
-        # Block sign-in for the user
-        Set-MsolUser -UserPrincipalName $userEmail -BlockCredential $true
+        # Ask for confirmation before proceeding
+        $confirmation = Read-Host -Prompt "To proceed with offboarding, type 'Y'"
+        if ($confirmation -eq "Y" -or $confirmation -eq "y") {
+            # Block sign-in for the user
+            Set-MsolUser -UserPrincipalName $userEmail -BlockCredential $true
 
-        # Reset the user's password
-        Set-MsolUserPassword -UserPrincipalName $userEmail -NewPassword $newPassword -ForceChangePassword $false
+            # Reset the user's password
+            Set-MsolUserPassword -UserPrincipalName $userEmail -NewPassword $newPassword -ForceChangePassword $false
 
-        # Get the user's current licenses
-        $user = Get-MsolUser -UserPrincipalName $userEmail
-        $currentLicenses = $user.Licenses.AccountSkuId
+            # Get the user's current licenses
+            $user = Get-MsolUser -UserPrincipalName $userEmail
+            $currentLicenses = $user.Licenses.AccountSkuId
 
-        # Define the licenses to keep
-        $licensesToKeep = @(
-            "reseller-account:O365_BUSINESS_ESSENTIALS",
-            "reseller-account:O365_BUSINESS_PREMIUM"
-        )
+            # Define the licenses to keep
+            $licensesToKeep = @(
+                "reseller-account:O365_BUSINESS_ESSENTIALS",
+                "reseller-account:O365_BUSINESS_PREMIUM"
+            )
 
-        # Remove licenses except for the ones to keep
-        foreach ($license in $currentLicenses) {
-            if ($license -notin $licensesToKeep) {
-                Set-MsolUserLicense -UserPrincipalName $userEmail -RemoveLicenses $license
+            # Remove licenses except for the ones to keep
+            foreach ($license in $currentLicenses) {
+                if ($license -notin $licensesToKeep) {
+                    Set-MsolUserLicense -UserPrincipalName $userEmail -RemoveLicenses $license
+                }
             }
+
+            Write-Host "Offboarding completed for user: $userEmail"
+        } else {
+            Write-Host "Offboarding process canceled."
         }
 
-        Write-Host "Offboarding completed for user: $userEmail"
-    } else {
-        Write-Host "Offboarding process canceled."
-    }
-
-    # Ask if another employee should be offboarded
-    $continueOffboarding = Read-Host -Prompt "Would you like to offboard another employee? Y/N"
-} while ($continueOffboarding -eq "Y" -or $continueOffboarding -eq "y")
+        # Ask if another employee should be offboarded
+        $continueOffboarding = Read-Host -Prompt "Would you like to offboard another employee? Y/N"
+    } while ($continueOffboarding -eq "Y" -or $continueOffboarding -eq "y")
 
 Write-Host "Offboarding complete."
 Read-Host -Prompt "Press any key to continue..."
 }
 
 #Define Pull Distribution List function
-# Define Pull Distribution List function
-# Define Pull Distribution List function
 function PullDistributionList {
     Write-Host "Retrieving Distribution List"
     # Retrieve all distribution groups in the Exchange environment
@@ -255,40 +265,38 @@ function PullDistributionList {
     Read-Host -Prompt "Press any key to continue..."
 }
 
-
-
 #Define Pull License List function
 function PullLicenseList {
-Write-Host "Retrieving License List"
-# Retrieve all users from the Office 365 tenant
-$AllUsers = Get-MsolUser -All
+    Write-Host "Retrieving License List"
+    # Retrieve all users from the Office 365 tenant
+    $AllUsers = Get-MsolUser -All
 
-# Create an empty array to store the license information
-$Result = @()
+    # Create an empty array to store the license information
+    $Result = @()
 
-# Iterate through each user in the list of all users
-foreach ($User in $AllUsers) {
-    # Get the licenses assigned to the current user
-    $Licenses = $User.Licenses
+    # Iterate through each user in the list of all users
+    foreach ($User in $AllUsers) {
+        # Get the licenses assigned to the current user
+        $Licenses = $User.Licenses
 
-    # Iterate through each license assigned to the current user
-    foreach ($License in $Licenses) {
-        # Create a new object with the user's name, email, and license name, and add it to the result array
-        $Result += New-Object PSObject -Property @{
-            'UserName'    = $User.DisplayName
-            'UserEmail'   = $User.UserPrincipalName
-            'LicenseName' = $License.AccountSkuId
+        # Iterate through each license assigned to the current user
+        foreach ($License in $Licenses) {
+            # Create a new object with the user's name, email, and license name, and add it to the result array
+            $Result += New-Object PSObject -Property @{
+                'UserName'    = $User.DisplayName
+                'UserEmail'   = $User.UserPrincipalName
+                'LicenseName' = $License.AccountSkuId
+            }
         }
     }
+    Write-Host "License List saved to UserLicenses CSV File "
+    # Export the result array to a CSV file named "UserLicenses.csv"
+    $Result | Export-Csv -Path "$PSScriptRoot\UserLicenses.csv" -NoTypeInformation -Encoding UTF8
+
+    Read-Host -Prompt "Press any key to continue..."
+
 }
-Write-Host "License List saved to UserLicenses CSV File "
-# Export the result array to a CSV file named "UserLicenses.csv"
-$Result | Export-Csv -Path "$PSScriptRoot\UserLicenses.csv" -NoTypeInformation -Encoding UTF8
-
-Read-Host -Prompt "Press any key to continue..."
-
-}
-
+#Define Display Disclaimer
 function DisplayDisclaimer {
     $disclaimer = @"
   __| |________________________________________| |__
@@ -306,27 +314,39 @@ function DisplayDisclaimer {
     |____________________________________________|
 "@
 
+
+    #clears screen
+	Clear-Host
+
     Write-Host -ForegroundColor White $disclaimer
-    Write-Host -NoNewline -ForegroundColor White "Do you agree to the terms? (Y/N): "
+    Write-Host -NoNewline -ForegroundColor White "           Do you agree to the terms? (Y/N): "
     $userAgreement = Read-Host
 
     return $userAgreement
 }
 
+function EULA{
 # Check for user agreement
 do {
     $agreement = DisplayDisclaimer
 } while ($agreement -notmatch '^[Yy]$')
+}
 
 
 
-# Main loop
-do {
-	#clears screen
-	Clear-Host
+function Main {
+    
+    SetConsoleAppearance
+    EULA
+    UpdateScript
 
-    # Present the user with available options
-    $menu = @"
+    # Main loop
+    do {
+        #clears screen
+        Clear-Host
+
+        # Present the user with available options
+        $menu = @"
   __| |________________________________________| |__
  (__   ________________________________________   __)
     | |                                        | |
@@ -352,35 +372,37 @@ do {
     | |                                        | | 
 "@
 
-    Write-Host -ForegroundColor White $menu
-	Write-Host -NoNewline -ForegroundColor White "Enter the number corresponding to the desired action: "
-    
-    # Read user input
-    $userInput = Read-Host
+        Write-Host -ForegroundColor White $menu
+        Write-Host -NoNewline -ForegroundColor White "Enter the number corresponding to the desired action: "
+        
+        # Read user input
+        $userInput = Read-Host
 
-    # Execute the chosen option
-    switch ($userInput) {
-        '1' {
-            OnboardEmployee
+        # Execute the chosen option
+        switch ($userInput) {
+            '1' {
+                OnboardEmployee
+            }
+            '2' {
+                OffboardEmployee
+            }
+            '3' {
+                PullDistributionList
+            }
+            '4' {
+                PullLicenseList
+            }
+            '5' {
+                Write-Host "Exiting, have a wonderful day!..."
+                Write-Host "The following command is asking to disconnect from exchange online. Respond Y"
+                # Disconnect from Exchange Online
+                Disconnect-ExchangeOnline
+                exit
+            }
+            default {
+                Write-Host "Invalid option. Please enter a valid number."
+            }
         }
-        '2' {
-            OffboardEmployee
-        }
-        '3' {
-            PullDistributionList
-        }
-        '4' {
-            PullLicenseList
-        }
-        '5' {
-            Write-Host "Exiting, have a wonderful day!..."
-			Write-Host "The following command is asking to disconnect from exchange online. Respond Y"
-			# Disconnect from Exchange Online
-			Disconnect-ExchangeOnline
-            exit
-        }
-        default {
-            Write-Host "Invalid option. Please enter a valid number."
-        }
-    }
-} while ($true)
+    } while ($true)
+}
+Main
