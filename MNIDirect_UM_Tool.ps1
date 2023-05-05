@@ -27,7 +27,7 @@ if (-not (Get-Module -ListAvailable -Name ExchangeOnlineManagement)) {
 # Connect to Exchange Online
 Connect-ExchangeOnline -Credential $Credential -ShowBanner:$false
 
-
+#Define Onboarding function
 function OnboardEmployee {
 
 do {
@@ -88,8 +88,6 @@ foreach ($license in $assignedLicenses) {
 
 Set-MsolUser -UserPrincipalName $email -BlockCredential $false
 Set-MsolUserPassword -UserPrincipalName $email -NewPassword $newPassword -ForceChangePassword $false
-
-
 
 	# Assign email groups based on position and branch number
 	$groupMapping = @{
@@ -218,13 +216,11 @@ function PullDistributionList {
         }
     }
     
-    
     Write-Host "List Saved to DistributionGroupsAndMembers CSV File"
     # Export the result array to a CSV file, without type information and using UTF-8 encoding
     $Result | Export-Csv -Path "$PSScriptRoot\DistributionGroupsAndMembers.csv" -NoTypeInformation -Encoding UTF8
     Read-Host -Prompt "Press any key to continue..."
 }
-
 
 #Define Pull License List function
 function PullLicenseList {
@@ -286,8 +282,6 @@ function DisplayDisclaimer {
 do {
     $agreement = DisplayDisclaimer
 } while ($agreement -notmatch '^[Yy]$')
-
-
 
 # Main loop
 do {
