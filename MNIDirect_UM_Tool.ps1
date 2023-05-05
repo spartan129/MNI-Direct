@@ -27,25 +27,6 @@ if (-not (Get-Module -ListAvailable -Name ExchangeOnlineManagement)) {
 # Connect to Exchange Online
 Connect-ExchangeOnline -Credential $Credential -ShowBanner:$false
 
-function Show-LoadingBar {
-    param (
-        [int]$DurationInSeconds = 10,
-        [string]$Message = "Processing..."
-    )
-
-    $ProgressMax = 100
-    $Interval = ($DurationInSeconds * 1000) / $ProgressMax
-
-    Write-Host ""
-
-    for ($i = 0; $i -le $ProgressMax; $i++) {
-        $ProgressBar = ('=' * $i) + (' ' * ($ProgressMax - $i))
-        Write-Host -NoNewline "`r$Message [$ProgressBar] $i%"
-        Start-Sleep -Milliseconds $Interval
-    }
-
-    Write-Host ""
-}
 
 function OnboardEmployee {
 
@@ -214,8 +195,8 @@ function PullDistributionList {
             }
         }
     }
-    Write-Host "Saving List to DistributionGroupsAndMembers CSV File"
-    Show-LoadingBar -DurationInSeconds 10 -Message "Loading..."
+    
+    
     Write-Host "List Saved to DistributionGroupsAndMembers CSV File"
     # Export the result array to a CSV file, without type information and using UTF-8 encoding
     $Result | Export-Csv -Path "$PSScriptRoot\DistributionGroupsAndMembers.csv" -NoTypeInformation -Encoding UTF8
@@ -255,6 +236,35 @@ Read-Host -Prompt "Press any key to continue..."
 
 }
 
+function DisplayDisclaimer {
+    $disclaimer = @"
+  __| |________________________________________| |__
+ (__   ________________________________________   __)
+    | |               MNI DIRECT               | |
+    | |________________________________________| |
+    | |     This script is designed for the    | |                        
+    | |     exclusive use of MNI Direct for    | |                       
+    | |      managing user onboarding and      | |                        
+    | |         offboarding processes.         | |                         
+    | |                                        | |                        
+    | |     DISCLAIMER: Unauthorized use of    | |                        
+    | |    this script is strictly prohibited. | |                        
+    | |________________________________________| |
+    |____________________________________________|
+"@
+
+    Write-Host -ForegroundColor White $disclaimer
+    Write-Host -NoNewline -ForegroundColor White "Do you agree to the terms? (Y/N): "
+    $userAgreement = Read-Host
+
+    return $userAgreement
+}
+
+# Check for user agreement
+do {
+    $agreement = DisplayDisclaimer
+} while ($agreement -notmatch '^[Yy]$')
+
 
 
 # Main loop
@@ -264,30 +274,29 @@ do {
 
     # Present the user with available options
     $menu = @"
- +--------------------------------------------+
- |  WELCOME TO THE MNI DIRECT USER MANAGEMENT |
- +--------------------------------------------+
-
- This script is designed for the exclusive use
- of MNI Direct for managing user onboarding and
- offboarding processes.
-
- DISCLAIMER: Unauthorized use of this script is
- strictly prohibited.
-
-  =============================================
-  ||  MNI DIRECT USER MANAGEMENT TOOL         ||
-  =============================================
-  ||                                          ||
-  ||   1. Onboard Employee                    ||
-  ||   2. Offboard Employee                   ||
-  ||   3. Pull Distribution List              ||
-  ||   4. Pull License List                   ||
-  ||   5. Exit                                ||
-  ||                                          ||
-  =============================================
-
-
+  __| |________________________________________| |__
+ (__   ________________________________________   __)
+    | |                                        | |
+    | |     MNI DIRECT USER MANAGEMENT TOOL    | |   
+    | |========================================| |
+    | |                                        | |   
+    | |    1. Onboard Employee                 | |   
+    | |    2. Offboard Employee                | |   
+    | |    3. Pull Distribution List           | |   
+    | |    4. Pull License List                | |   
+    | |    5. Exit                             | |   
+    | |                                        | |   
+    | |========================================| |
+    | |       wWWWw               wWWWw        | |
+    | | vVVVv (___) wWWWw         (___)  vVVVv | |
+    | | (___)  ~Y~  (___)  vVVVv   ~Y~   (___) | |
+    | |  ~Y~   \|    ~Y~   (___)    |/    ~Y~  | |
+    | |  \|   \ |/   \| /  \~Y~/   \|    \ |/  | |
+    | | \\|// \\|// \\|/// \\|//  \\|// \\\|///| |
+    | |^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^| |
+  __| |________________________________________| |__
+ (__   ________________________________________   __)
+    | |                                        | | 
 "@
 
     Write-Host -ForegroundColor White $menu
@@ -311,7 +320,7 @@ do {
             PullLicenseList
         }
         '5' {
-            Write-Host "Exiting..."
+            Write-Host "Exiting, have a wonderful day!..."
 			Write-Host "The following command is asking to disconnect from exchange online. Respond Y"
 			# Disconnect from Exchange Online
 			Disconnect-ExchangeOnline
