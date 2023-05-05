@@ -1,22 +1,32 @@
-﻿param (
-    [switch] $SkipUpdateCheck
-)
+﻿# Ask the user if they would like to check for an update
+$checkForUpdate = Read-Host -Prompt "Would you like to check for an update? This will close the script after updating. Type 'yes' to update or 'no' to continue."
 
-if (-not $SkipUpdateCheck) {
-    $apiUrl = "https://raw.githubusercontent.com/spartan129/MNI-Direct/be662fd4d16d8f9ce8c63842a8d80d9bce064d99/MNIDirect_UM_Tool.ps1"
+if ($checkForUpdate.ToLower() -eq 'yes') {
+    # Set GitHub API URL to get the latest version of your script
+    $apiUrl = "https://raw.githubusercontent.com/spartan129/MNI-Direct/main/MNIDirect_UM_Tool.ps1"
 
+    # Get the content of the script from GitHub
     $githubScriptContent = Invoke-WebRequest -Uri $apiUrl -UseBasicParsing
 
+    # Check if the script content is not empty
     if ($githubScriptContent -and $githubScriptContent.Content) {
-        $githubScriptContent = ($githubScriptContent.Content) -replace "`r`n", "`n"
+        $githubScriptContent = $githubScriptContent.Content
 
+        # Get the path of the currently running script
         $currentScriptPath = $MyInvocation.MyCommand.Path
-        $currentScriptContent = (Get-Content -Path $currentScriptPath -Raw) -replace "`r`n", "`n"
 
+        # Get the content of the currently running script
+        $currentScriptContent = Get-Content -Path $currentScriptPath -Raw
+
+        # Compare the content of the GitHub script and the current script
         if ($currentScriptContent -ne $githubScriptContent) {
-            Set-Content -Path $currentScriptPath -Value $githubScriptContent -Encoding UTF8
+            # Update the current script with the content of the GitHub script
+            Set-Content -Path $currentScriptPath -Value $githubScriptContent
+
+            # Show a message that the script has been updated
             Write-Host "The script has been updated to the latest version." -ForegroundColor Green
-            & $currentScriptPath -SkipUpdateCheck
+
+            # Close the script after updating
             exit
         } else {
             Write-Host "The script is already up-to-date." -ForegroundColor Green
@@ -25,8 +35,6 @@ if (-not $SkipUpdateCheck) {
         Write-Host "Failed to retrieve the script content from GitHub." -ForegroundColor Red
     }
 }
-
-# Rest of your script
 
 
 
@@ -287,13 +295,13 @@ function DisplayDisclaimer {
  (__   ________________________________________   __)
     | |               MNI DIRECT               | |
     | |________________________________________| |
-    | |     This script is designed for the    | |                        
-    | |     exclusive use of MNI Direct for    | |                       
-    | |      managing user onboarding and      | |                        
-    | |         offboarding processes.         | |                         
-    | |                                        | |                        
-    | |     DISCLAIMER: Unauthorized use of    | |                        
-    | |    this script is strictly prohibited. | |                        
+    | |     This script is designed for the    | |
+    | |     exclusive use of MNI Direct for    | |
+    | |      managing user onboarding and      | |
+    | |         offboarding processes.         | |
+    | |                                        | |
+    | |     DISCLAIMER: Unauthorized use of    | |
+    | |    this script is strictly prohibited. | |
     | |________________________________________| |
     |____________________________________________|
 "@
@@ -376,4 +384,3 @@ do {
         }
     }
 } while ($true)
-
