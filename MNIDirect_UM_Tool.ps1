@@ -14,7 +14,7 @@ if (-not $SkipUpdateCheck) {
         $currentScriptContent = Get-Content -Path $currentScriptPath -Raw
 
         if ($currentScriptContent -ne $githubScriptContent) {
-            Set-Content -Path $currentScriptPath -Value $githubScriptContent
+            Set-Content -Path $currentScriptPath -Value $githubScriptContent -Encoding UTF8
             Write-Host "The script has been updated to the latest version." -ForegroundColor Green
             & $currentScriptPath -SkipUpdateCheck
             exit
@@ -375,3 +375,4 @@ do {
         }
     }
 } while ($true)
+
