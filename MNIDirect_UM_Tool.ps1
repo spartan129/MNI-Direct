@@ -32,43 +32,65 @@ function OnboardEmployee {
 
 do {
 
-	# Gather user information
-	$email = Read-Host -Prompt "Enter user's email address"
-	$branch = Read-Host -Prompt "Enter user's branch number (42, 43, 44, or 45)"
-	$position = Read-Host -Prompt "Enter user's position (Sales, Branch Manager, or Nursery Manager)"
-	$newPassword = 'Ch@ngeMe1!'
-	# Validate branch number
-	$validBranches = @(42, 43, 44, 45)
-	if (-not ($branch -in $validBranches)) {
-		Write-Host "Invalid branch number. Please provide a valid branch number (42, 43, 44, or 45)."
-		exit
-	}
+# Gather user information
+$email = Read-Host -Prompt "Enter user's email address"
+$branch = Read-Host -Prompt "Enter user's branch number (42, 43, 44, or 45)"
+$position = Read-Host -Prompt "Enter user's position (Sales, Branch Manager, or Nursery Manager)"
+$newPassword = 'Ch@ngeMe1!'
+# Validate branch number
+$validBranches = @(42, 43, 44, 45)
+if (-not ($branch -in $validBranches)) {
+    Write-Host "Invalid branch number. Please provide a valid branch number (42, 43, 44, or 45)."
+    exit
+}
 
-	# Assign licenses based on position
-	$licenseMapping = @{
-		'Sales' = @('reseller-account:DYN365_BUSCENTRAL_ESSENTIAL', 'reseller-account:O365_BUSINESS_ESSENTIALS','reseller-account:POWER_BI_STANDARD','reseller-account:POWERAPPS_VIRAL')
-		'Branch Manager' = @('reseller-account:DYN365_BUSCENTRAL_ESSENTIAL', 'reseller-account:POWER_BI_STANDARD','reseller-account:O365_BUSINESS_PREMIUM','reseller-account:POWERAPPS_VIRAL')
-		'Nursery Manager' = @('reseller-account:DYN365_BUSCENTRAL_ESSENTIAL', 'reseller-account:POWER_BI_STANDARD','reseller-account:O365_BUSINESS_PREMIUM','reseller-account:POWERAPPS_VIRAL')
-	}
+# Check and assign O365 licenses based on position
+$o365Licenses = @{
+    'Sales' = 'reseller-account:O365_BUSINESS_ESSENTIALS'
+    'Branch Manager' = 'reseller-account:O365_BUSINESS_PREMIUM'
+    'Nursery Manager' = 'reseller-account:O365_BUSINESS_PREMIUM'
+}
 
-	$assignedLicenses = $licenseMapping[$position]
+$o365License = $o365Licenses[$position]
+$userLicenses = (Get-MsolUser -UserPrincipalName $email).Licenses.AccountSkuId
 
-	if (-not $assignedLicenses) {
-		Write-Host "Invalid position. Please provide a valid position (Sales, Branch Manager, or Nursery Manager)."
-		exit
-	}
+if ($o365License -notin $userLicenses) {
+    Set-MsolUserLicense -UserPrincipalName $email -AddLicenses $o365License
+    Write-Host "Assigned O365 license: $o365License"
+    Write-Host "New users take several minutes to assign an email. Please wait."
+    Start-Sleep -Seconds 300
+} else {
+    Write-Host "User already has the O365 license: $o365License"
+}
 
-	foreach ($license in $assignedLicenses) {
-		$userLicenses = (Get-MsolUser -UserPrincipalName $email).Licenses.AccountSkuId
-		if ($license -notin $userLicenses) {
-			Set-MsolUserLicense -UserPrincipalName $email -AddLicenses $license
-		} else {
-			Write-Host "User already has the $license license assigned. Skipping."
-		}
-	}
+# Assign other licenses based on position
+$licenseMapping = @{
+    'Sales' = @('reseller-account:DYN365_BUSCENTRAL_ESSENTIAL', 'reseller-account:POWER_BI_STANDARD','reseller-account:POWERAPPS_VIRAL')
+    'Branch Manager' = @('reseller-account:DYN365_BUSCENTRAL_ESSENTIAL', 'reseller-account:POWER_BI_STANDARD','reseller-account:POWERAPPS_VIRAL')
+    'Nursery Manager' = @('reseller-account:DYN365_BUSCENTRAL_ESSENTIAL', 'reseller-account:POWER_BI_STANDARD','reseller-account:POWERAPPS_VIRAL')
+}
+
+$assignedLicenses = $licenseMapping[$position]
+
+if (-not $assignedLicenses) {
+    Write-Host "Invalid position. Please provide a valid position (Sales, Branch Manager, or Nursery Manager)."
+    exit
+}
+
+foreach ($license in $assignedLicenses) {
+    $userLicenses = (Get-MsolUser -UserPrincipalName $email).Licenses.AccountSkuId
+    if ($license -notin $userLicenses) {
+        Set-MsolUserLicense -UserPrincipalName $email -AddLicenses $license
+    } else {
+        Write-Host "User already has the $license license assigned. Skipping."
+    }
+}
 
 Set-MsolUser -UserPrincipalName $email -BlockCredential $false
 Set-MsolUserPassword -UserPrincipalName $email -NewPassword $newPassword -ForceChangePassword $false
+
+
+
 	# Assign email groups based on position and branch number
 	$groupMapping = @{
 		'Sales' = @{
