@@ -1,4 +1,5 @@
 # Set GitHub API URL to get the latest version of your script
+
 $apiUrl = "https://raw.githubusercontent.com/spartan129/MNI-Direct/main/MNIDirect_UM_Tool.ps1"
 
 # Get the content of the script from GitHub
@@ -23,7 +24,9 @@ if ($githubScriptContent -and $githubScriptContent.Content) {
         Write-Host "The script has been updated to the latest version." -ForegroundColor Green
 
         # You can choose to restart the script after update by uncommenting the following line
+
         & $currentScriptPath
+
     } else {
         Write-Host "The script is already up-to-date." -ForegroundColor Green
     }
