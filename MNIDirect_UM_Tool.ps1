@@ -1,4 +1,38 @@
-﻿function SetConsoleAppearance {
+﻿#Function to check User Credentials and import security modules
+
+Function CredCheck{
+    Write-Host 'Please complete both credential checks'
+
+    # Check if the CredentialManager module is installed
+    $CredentialManagerInstalled = Get-Module -ListAvailable -Name CredentialManager
+
+    if ($CredentialManagerInstalled) {
+        Write-Host 'Credential Manager has been found. Skipping Login'
+        $CredentialName = "MyExchangeOnlineCredential"
+        $Credential = Get-StoredCredential -Target $CredentialName
+    } else {
+        $Credential = Get-Credential
+    }
+
+    # Check if the MSOnline module is installed, and install it if necessary
+    if (-not (Get-Module -ListAvailable -Name MSOnline)) {
+        Install-Module -Name MSOnline -Scope CurrentUser -Force
+    }
+
+    # Connect to Microsoft 365 tenant
+    Connect-MsolService -Credential $Credential
+
+    # Check if the ExchangeOnlineManagement module is installed, and install it if necessary
+    if (-not (Get-Module -ListAvailable -Name ExchangeOnlineManagement)) {
+        Install-Module -Name ExchangeOnlineManagement -Scope CurrentUser -Force
+    }
+
+    # Connect to Exchange Online
+    Connect-ExchangeOnline -Credential $Credential -ShowBanner:$false
+}
+
+#Function to set the background color and window size of the console
+function SetConsoleAppearance {
     # Set the desired background color
     $backgroundColor = "Black"
 
@@ -36,14 +70,16 @@
     $Host.UI.RawUI.BufferSize = $newBufferSize
 }
 
+#Function to update the script after a user prompt is given, connects to github to pull script update
 function UpdateScript {
     # Ask the user if they would like to check for an update
+    Clear-Host
     $checkForUpdate = Read-Host -Prompt "
        Would you like to check for an update? 
       This will close the script after updating. 
-       Type 'yes' to update or 'no' to continue"
+                    Type Y/N "
 
-    if ($checkForUpdate.ToLower() -eq 'yes') {
+    if ($checkForUpdate.ToLower() -eq 'y') {
         # Set GitHub API URL to get the latest version of your script
         $apiUrl = "https://raw.githubusercontent.com/spartan129/MNI-Direct/main/MNIDirect_UM_Tool.ps1"
 
@@ -80,6 +116,7 @@ function UpdateScript {
     }
 }
 
+#Function to set onboarding employee licenses and email groups
 function OnboardEmployee {
 
     do {
@@ -118,33 +155,67 @@ function OnboardEmployee {
                 Write-Host "User already has the $license license assigned. Skipping."
             }
         }
-
+    Start-Sleep -Seconds 5
+    Write-Host "New user password is:"
     Set-MsolUser -UserPrincipalName $email -BlockCredential $false
+
     Set-MsolUserPassword -UserPrincipalName $email -NewPassword $newPassword -ForceChangePassword $false
         # Assign email groups based on position and branch number
         $groupMapping = @{
             'Sales' = @{
-                '42' = @('allstaff@mnidirect.com', 'purchasing-atl@mnidirect.com','branch42@mnidirect.com')
-                '43' = @('allstaff@mnidirect.com', 'br43purchasing@mnidirect.com','branch43@mnidirect.com')
-                '44' = @('allstaff@mnidirect.com', 'purchasing-atl@mnidirect.com','branch44@mnidirect.com')
-                '45' = @('allstaff@mnidirect.com', 'br45purchasing@mnidirect.com','branch45@mnidirect.com')
+                '42' = @('purchasing-atl@mnidirect.com','branch42@mnidirect.com')
+                '43' = @('br43purchasing@mnidirect.com','branch43@mnidirect.com')
+                '44' = @('purchasing-atl@mnidirect.com','branch44@mnidirect.com')
+                '45' = @('br45purchasing@mnidirect.com','branch45@mnidirect.com')
             }
             'Branch Manager' = @{
-                '42' = @('br42managers@mnidirect.com','allstaff@mnidirect.com', 'purchasing-atl@mnidirect.com','availability@mnidirect.com','safety@mnidirect.com','branch42@mnidirect.com','br42security@mnidirect.com')
-                '43' = @('br43managers@mnidirect.com','allstaff@mnidirect.com', 'br43purchasing@mnidirect.com','availability@mnidirect.com','safety@mnidirect.com','branch43@mnidirect.com','br43security@mnidirect.com')
-                '44' = @('br44managers@mnidirect.com','allstaff@mnidirect.com', 'purchasing-atl@mnidirect.com','availability@mnidirect.com','safety@mnidirect.com','branch44@mnidirect.com','br44security@mnidirect.com')
-                '45' = @('br45managers@mnidirect.com','allstaff@mnidirect.com', 'br45purchasing@mnidirect.com','availability@mnidirect.com','safety@mnidirect.com','branch45@mnidirect.com')
+                '42' = @('br42managers@mnidirect.com','purchasing-atl@mnidirect.com','availability@mnidirect.com','safety@mnidirect.com','branch42@mnidirect.com','br42security@mnidirect.com')
+                '43' = @('br43managers@mnidirect.com','br43purchasing@mnidirect.com','availability@mnidirect.com','safety@mnidirect.com','branch43@mnidirect.com','br43security@mnidirect.com')
+                '44' = @('br44managers@mnidirect.com','purchasing-atl@mnidirect.com','availability@mnidirect.com','safety@mnidirect.com','branch44@mnidirect.com','br44security@mnidirect.com')
+                '45' = @('br45managers@mnidirect.com','br45purchasing@mnidirect.com','availability@mnidirect.com','safety@mnidirect.com','branch45@mnidirect.com')
             }
             'Nursery Manager' = @{
-                '42' = @('br42managers@mnidirect.com','allstaff@mnidirect.com', 'purchasing-atl@mnidirect.com','availability@mnidirect.com','safety@mnidirect.com','branch42@mnidirect.com','br42security@mnidirect.com')
-                '43' = @('br43managers@mnidirect.com','allstaff@mnidirect.com', 'br43purchasing@mnidirect.com','availability@mnidirect.com','safety@mnidirect.com','branch43@mnidirect.com','br43security@mnidirect.com')
-                '44' = @('br44managers@mnidirect.com','allstaff@mnidirect.com', 'purchasing-atl@mnidirect.com','availability@mnidirect.com','safety@mnidirect.com','branch44@mnidirect.com','br44security@mnidirect.com')
-                '45' = @('br45managers@mnidirect.com','allstaff@mnidirect.com', 'br45purchasing@mnidirect.com','availability@mnidirect.com','safety@mnidirect.com','branch45@mnidirect.com')
+                '42' = @('br42managers@mnidirect.com','purchasing-atl@mnidirect.com','availability@mnidirect.com','safety@mnidirect.com','branch42@mnidirect.com','br42security@mnidirect.com')
+                '43' = @('br43managers@mnidirect.com','br43purchasing@mnidirect.com','availability@mnidirect.com','safety@mnidirect.com','branch43@mnidirect.com','br43security@mnidirect.com')
+                '44' = @('br44managers@mnidirect.com','purchasing-atl@mnidirect.com','availability@mnidirect.com','safety@mnidirect.com','branch44@mnidirect.com','br44security@mnidirect.com')
+                '45' = @('br45managers@mnidirect.com','br45purchasing@mnidirect.com','availability@mnidirect.com','safety@mnidirect.com','branch45@mnidirect.com')
             }
         }
         $assignedGroups = $groupMapping[$position][$branch]
 
         if ($assignedGroups) {
+            $allStaffGroup = 'allstaff@mnidirect.com'
+            $groupAssigned = $false
+            $tries = 0
+            $maxTries = 10
+    
+            # Check if the user is already a member of the allstaff group
+            $allStaffGroupMembers = Get-DistributionGroupMember -Identity $allStaffGroup | Select-Object -ExpandProperty PrimarySmtpAddress
+            if ($email -in $allStaffGroupMembers) {
+                $groupAssigned = $true
+                Write-Host "User is already a member of the $allStaffGroup group. Skipping."
+            }
+    
+            # If the user is not a member, attempt to add them to the allstaff group every 60 seconds, up to a maximum of 10 tries
+            while (-not $groupAssigned -and $tries -lt $maxTries) {
+                $tries++
+                try {
+                    Add-DistributionGroupMember -Identity $allStaffGroup -Member $email -ErrorAction Stop
+                    $groupAssigned = $true
+                    Write-Host "User added to the $allStaffGroup group on attempt $tries."
+                } catch {
+                    Write-Host "Failed to add user to the $allStaffGroup group on attempt $tries. Retrying in 60 seconds..."
+                    Start-Sleep -Seconds 60
+                }
+            }
+    
+            if (-not $groupAssigned) {
+                Write-Host "Failed to add user to the $allStaffGroup group after $maxTries attempts. Please check the user's email address and try again later."
+            }
+    
+            # Remove the allstaff group from the assigned groups as it has already been processed
+            #$assignedGroups = $assignedGroups | Where-Object { $_ -ne $allStaffGroup }
+            
             foreach ($group in $assignedGroups) {
                 $groupMembers = Get-DistributionGroupMember -Identity $group | Select-Object -ExpandProperty PrimarySmtpAddress
                 if ($email -notin $groupMembers) {
@@ -153,27 +224,28 @@ function OnboardEmployee {
                     Write-Host "User is already a member of the $group group. Skipping."
                 }
             }
+            
         }
         else {
             Write-Host "Invalid position or branch number. Please provide valid inputs."
             exit
         }
-
+    
         Write-Host "User onboarding process completed successfully."
-
+    
         $continueOnboarding = Read-Host -Prompt "Would you like to onboard another employee? (Y/N)"
     } while ($continueOnboarding -eq 'Y' -or $continueOnboarding -eq 'y')
-Write-Host "Onboarding complete."
-Read-Host -Prompt "Press any key to continue..."
-}
+    Write-Host "Onboarding complete."
+    Read-Host -Prompt "Press any key to continue..."
+    }
 
-# Define offboarding function
+#Function to offboard users, but leaves emails and groups set
 function OffboardEmployee {
 
     do {
         # Prompt for user email and new password
-        $userEmail = Read-Host -Prompt "Enter the email address of the user to be offboarded"
-        $newPassword = Read-Host -Prompt "Enter the new password for the user"
+        $userEmail = Read-Host -Prompt "Email to be offboarded"
+        $newPassword = Read-Host -Prompt "Enter the new password to be set"
 
         # Display the username and password for confirmation
         Write-Host "Please confirm the following information:"
@@ -187,6 +259,7 @@ function OffboardEmployee {
             Set-MsolUser -UserPrincipalName $userEmail -BlockCredential $true
 
             # Reset the user's password
+            Write-Host "New user password is:"
             Set-MsolUserPassword -UserPrincipalName $userEmail -NewPassword $newPassword -ForceChangePassword $false
 
             # Get the user's current licenses
@@ -219,7 +292,7 @@ Write-Host "Offboarding complete."
 Read-Host -Prompt "Press any key to continue..."
 }
 
-#Define Pull Distribution List function
+#Function to Pull Distribution List function
 function PullDistributionList {
     Write-Host "Retrieving Distribution List"
     # Retrieve all distribution groups in the Exchange environment
@@ -265,7 +338,7 @@ function PullDistributionList {
     Read-Host -Prompt "Press any key to continue..."
 }
 
-#Define Pull License List function
+#Function to Pull License List function
 function PullLicenseList {
     Write-Host "Retrieving License List"
     # Retrieve all users from the Office 365 tenant
@@ -296,7 +369,7 @@ function PullLicenseList {
     Read-Host -Prompt "Press any key to continue..."
 
 }
-#Define Display Disclaimer
+#Function to show Display Disclaimer
 function DisplayDisclaimer {
     $disclaimer = @"
   __| |________________________________________| |__
@@ -324,17 +397,17 @@ function DisplayDisclaimer {
 
     return $userAgreement
 }
-#Define EULA
+#Function to show a EULA
 function EULA{
 # Check for user agreement
 do {
     $agreement = DisplayDisclaimer
 } while ($agreement -notmatch '^[Yy]$')
 }
-#Define Main
+#Define Main function that defines the order of the script functions
 function Main {
-    
     SetConsoleAppearance
+    CredCheck
     EULA
     UpdateScript
 
@@ -404,3 +477,11 @@ function Main {
     } while ($true)
 }
 Main
+
+
+#NEEDED Function to remove all groups and BB/ BS from user
+#NEEDED Function to add/check credential saver
+#NEEDED Function log file with user output of changes
+#update function to accept usernames/ assign domain in script
+#update onboarding to accept abreviations BM NM SA
+#make script able to add a csv of employees without emails in the email groups that should be removed
