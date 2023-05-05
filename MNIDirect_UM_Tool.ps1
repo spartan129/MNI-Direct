@@ -8,10 +8,10 @@ if (-not $SkipUpdateCheck) {
     $githubScriptContent = Invoke-WebRequest -Uri $apiUrl -UseBasicParsing
 
     if ($githubScriptContent -and $githubScriptContent.Content) {
-        $githubScriptContent = $githubScriptContent.Content -replace "`r`n", "`n"
+        $githubScriptContent = ($githubScriptContent.Content) -replace "`r`n", "`n"
 
         $currentScriptPath = $MyInvocation.MyCommand.Path
-        $currentScriptContent = Get-Content -Path $currentScriptPath -Raw -replace "`r`n", "`n"
+        $currentScriptContent = (Get-Content -Path $currentScriptPath -Raw) -replace "`r`n", "`n"
 
         if ($currentScriptContent -ne $githubScriptContent) {
             Set-Content -Path $currentScriptPath -Value $githubScriptContent -Encoding UTF8
@@ -25,6 +25,9 @@ if (-not $SkipUpdateCheck) {
         Write-Host "Failed to retrieve the script content from GitHub." -ForegroundColor Red
     }
 }
+
+# Rest of your script
+
 
 
 Write-Host 'Please complete both credential checks'
@@ -373,3 +376,4 @@ do {
         }
     }
 } while ($true)
+
