@@ -39,9 +39,9 @@
 function UpdateScript {
     # Ask the user if they would like to check for an update
     $checkForUpdate = Read-Host -Prompt "
-        Would you like to check for an update? 
-        This will close the script after updating. 
-        Type 'yes' to update or 'no' to continue"
+       Would you like to check for an update? 
+      This will close the script after updating. 
+       Type 'yes' to update or 'no' to continue"
 
     if ($checkForUpdate.ToLower() -eq 'yes') {
         # Set GitHub API URL to get the latest version of your script
@@ -319,21 +319,19 @@ function DisplayDisclaimer {
 	Clear-Host
 
     Write-Host -ForegroundColor White $disclaimer
-    Write-Host -NoNewline -ForegroundColor White "           Do you agree to the terms? (Y/N): "
+    Write-Host -NoNewline -ForegroundColor White "          Do you agree to the terms? (Y/N): "
     $userAgreement = Read-Host
 
     return $userAgreement
 }
-
+#Define EULA
 function EULA{
 # Check for user agreement
 do {
     $agreement = DisplayDisclaimer
 } while ($agreement -notmatch '^[Yy]$')
 }
-
-
-
+#Define Main
 function Main {
     
     SetConsoleAppearance
