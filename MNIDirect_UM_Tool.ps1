@@ -1,3 +1,35 @@
+# Set GitHub API URL to get the latest version of your script
+$apiUrl = "https://raw.githubusercontent.com/your-github-username/your-repo-name/main/your-script-name.ps1"
+
+# Get the content of the script from GitHub
+$githubScriptContent = Invoke-WebRequest -Uri $apiUrl -UseBasicParsing
+
+# Check if the script content is not empty
+if ($githubScriptContent -and $githubScriptContent.Content) {
+    $githubScriptContent = $githubScriptContent.Content
+
+    # Get the path of the currently running script
+    $currentScriptPath = $MyInvocation.MyCommand.Path
+
+    # Get the content of the currently running script
+    $currentScriptContent = Get-Content -Path $currentScriptPath -Raw
+
+    # Compare the content of the GitHub script and the current script
+    if ($currentScriptContent -ne $githubScriptContent) {
+        # Update the current script with the content of the GitHub script
+        Set-Content -Path $currentScriptPath -Value $githubScriptContent
+
+        # Show a message that the script has been updated
+        Write-Host "The script has been updated to the latest version." -ForegroundColor Green
+
+        # You can choose to restart the script after update by uncommenting the following line
+        # & $currentScriptPath
+    } else {
+        Write-Host "The script is already up-to-date." -ForegroundColor Green
+    }
+} else {
+    Write-Host "Failed to retrieve the script content from GitHub." -ForegroundColor Red
+}
 Write-Host 'Please complete both credential checks'
 
 # Check if the CredentialManager module is installed
@@ -27,68 +59,48 @@ if (-not (Get-Module -ListAvailable -Name ExchangeOnlineManagement)) {
 # Connect to Exchange Online
 Connect-ExchangeOnline -Credential $Credential -ShowBanner:$false
 
-#Define Onboarding function
+
 function OnboardEmployee {
 
 do {
 
-# Gather user information
-$email = Read-Host -Prompt "Enter user's email address"
-$branch = Read-Host -Prompt "Enter user's branch number (42, 43, 44, or 45)"
-$position = Read-Host -Prompt "Enter user's position (Sales, Branch Manager, or Nursery Manager)"
-$newPassword = 'Ch@ngeMe1!'
-# Validate branch number
-$validBranches = @(42, 43, 44, 45)
-if (-not ($branch -in $validBranches)) {
-    Write-Host "Invalid branch number. Please provide a valid branch number (42, 43, 44, or 45)."
-    exit
-}
+	# Gather user information
+	$email = Read-Host -Prompt "Enter user's email address"
+	$branch = Read-Host -Prompt "Enter user's branch number (42, 43, 44, or 45)"
+	$position = Read-Host -Prompt "Enter user's position (Sales, Branch Manager, or Nursery Manager)"
+	$newPassword = 'Ch@ngeMe1!'
+	# Validate branch number
+	$validBranches = @(42, 43, 44, 45)
+	if (-not ($branch -in $validBranches)) {
+		Write-Host "Invalid branch number. Please provide a valid branch number (42, 43, 44, or 45)."
+		exit
+	}
 
-# Check and assign O365 licenses based on position
-$o365Licenses = @{
-    'Sales' = 'reseller-account:O365_BUSINESS_ESSENTIALS'
-    'Branch Manager' = 'reseller-account:O365_BUSINESS_PREMIUM'
-    'Nursery Manager' = 'reseller-account:O365_BUSINESS_PREMIUM'
-}
+	# Assign licenses based on position
+	$licenseMapping = @{
+		'Sales' = @('reseller-account:DYN365_BUSCENTRAL_ESSENTIAL', 'reseller-account:O365_BUSINESS_ESSENTIALS','reseller-account:POWER_BI_STANDARD','reseller-account:POWERAPPS_VIRAL')
+		'Branch Manager' = @('reseller-account:DYN365_BUSCENTRAL_ESSENTIAL', 'reseller-account:POWER_BI_STANDARD','reseller-account:O365_BUSINESS_PREMIUM','reseller-account:POWERAPPS_VIRAL')
+		'Nursery Manager' = @('reseller-account:DYN365_BUSCENTRAL_ESSENTIAL', 'reseller-account:POWER_BI_STANDARD','reseller-account:O365_BUSINESS_PREMIUM','reseller-account:POWERAPPS_VIRAL')
+	}
 
-$o365License = $o365Licenses[$position]
-$userLicenses = (Get-MsolUser -UserPrincipalName $email).Licenses.AccountSkuId
+	$assignedLicenses = $licenseMapping[$position]
 
-if ($o365License -notin $userLicenses) {
-    Set-MsolUserLicense -UserPrincipalName $email -AddLicenses $o365License
-    Write-Host "Assigned O365 license: $o365License"
-    Write-Host "New users take several minutes to assign an email. Please wait."
-    Start-Sleep -Seconds 300
-} else {
-    Write-Host "User already has the O365 license: $o365License"
-}
+	if (-not $assignedLicenses) {
+		Write-Host "Invalid position. Please provide a valid position (Sales, Branch Manager, or Nursery Manager)."
+		exit
+	}
 
-# Assign other licenses based on position
-$licenseMapping = @{
-    'Sales' = @('reseller-account:DYN365_BUSCENTRAL_ESSENTIAL', 'reseller-account:POWER_BI_STANDARD','reseller-account:POWERAPPS_VIRAL')
-    'Branch Manager' = @('reseller-account:DYN365_BUSCENTRAL_ESSENTIAL', 'reseller-account:POWER_BI_STANDARD','reseller-account:POWERAPPS_VIRAL')
-    'Nursery Manager' = @('reseller-account:DYN365_BUSCENTRAL_ESSENTIAL', 'reseller-account:POWER_BI_STANDARD','reseller-account:POWERAPPS_VIRAL')
-}
-
-$assignedLicenses = $licenseMapping[$position]
-
-if (-not $assignedLicenses) {
-    Write-Host "Invalid position. Please provide a valid position (Sales, Branch Manager, or Nursery Manager)."
-    exit
-}
-
-foreach ($license in $assignedLicenses) {
-    $userLicenses = (Get-MsolUser -UserPrincipalName $email).Licenses.AccountSkuId
-    if ($license -notin $userLicenses) {
-        Set-MsolUserLicense -UserPrincipalName $email -AddLicenses $license
-    } else {
-        Write-Host "User already has the $license license assigned. Skipping."
-    }
-}
+	foreach ($license in $assignedLicenses) {
+		$userLicenses = (Get-MsolUser -UserPrincipalName $email).Licenses.AccountSkuId
+		if ($license -notin $userLicenses) {
+			Set-MsolUserLicense -UserPrincipalName $email -AddLicenses $license
+		} else {
+			Write-Host "User already has the $license license assigned. Skipping."
+		}
+	}
 
 Set-MsolUser -UserPrincipalName $email -BlockCredential $false
 Set-MsolUserPassword -UserPrincipalName $email -NewPassword $newPassword -ForceChangePassword $false
-
 	# Assign email groups based on position and branch number
 	$groupMapping = @{
 		'Sales' = @{
@@ -188,6 +200,8 @@ Read-Host -Prompt "Press any key to continue..."
 }
 
 #Define Pull Distribution List function
+# Define Pull Distribution List function
+# Define Pull Distribution List function
 function PullDistributionList {
     Write-Host "Retrieving Distribution List"
     # Retrieve all distribution groups in the Exchange environment
@@ -201,10 +215,21 @@ function PullDistributionList {
         # Retrieve the members of the current distribution group
         $Members = Get-DistributionGroupMember -Identity $Group.PrimarySmtpAddress
 
+        # Initialize a flag to indicate if the group contains a member with the mccorklenurseries.com domain
+        $containsMccorkleMember = $false
+
         # Loop through each member of the current distribution group
         foreach ($Member in $Members) {
-            # Check if the email domain is not mccorklenurseries.com
-            if ($Member.PrimarySmtpAddress -notmatch "@mccorklenurseries.com$") {
+            # Check if the email domain is mccorklenurseries.com
+            if ($Member.PrimarySmtpAddress -match "@mccorklenurseries.com$") {
+                $containsMccorkleMember = $true
+                break
+            }
+        }
+
+        # If the group does not contain a member with the mccorklenurseries.com domain, add the group and its members to the result
+        if (!$containsMccorkleMember) {
+            foreach ($Member in $Members) {
                 # Create a new custom object with the group and member properties
                 $Result += New-Object PSObject -Property @{
                     'GroupName' = $Group.DisplayName # Display name of the group
@@ -215,12 +240,14 @@ function PullDistributionList {
             }
         }
     }
-    
+
     Write-Host "List Saved to DistributionGroupsAndMembers CSV File"
     # Export the result array to a CSV file, without type information and using UTF-8 encoding
     $Result | Export-Csv -Path "$PSScriptRoot\DistributionGroupsAndMembers.csv" -NoTypeInformation -Encoding UTF8
     Read-Host -Prompt "Press any key to continue..."
 }
+
+
 
 #Define Pull License List function
 function PullLicenseList {
@@ -282,6 +309,8 @@ function DisplayDisclaimer {
 do {
     $agreement = DisplayDisclaimer
 } while ($agreement -notmatch '^[Yy]$')
+
+
 
 # Main loop
 do {
