@@ -168,6 +168,8 @@ Read-Host -Prompt "Press any key to continue..."
 }
 
 #Define Pull Distribution List function
+# Define Pull Distribution List function
+# Define Pull Distribution List function
 function PullDistributionList {
     Write-Host "Retrieving Distribution List"
     # Retrieve all distribution groups in the Exchange environment
@@ -181,10 +183,21 @@ function PullDistributionList {
         # Retrieve the members of the current distribution group
         $Members = Get-DistributionGroupMember -Identity $Group.PrimarySmtpAddress
 
+        # Initialize a flag to indicate if the group contains a member with the mccorklenurseries.com domain
+        $containsMccorkleMember = $false
+
         # Loop through each member of the current distribution group
         foreach ($Member in $Members) {
-            # Check if the email domain is not mccorklenurseries.com
-            if ($Member.PrimarySmtpAddress -notmatch "@mccorklenurseries.com$") {
+            # Check if the email domain is mccorklenurseries.com
+            if ($Member.PrimarySmtpAddress -match "@mccorklenurseries.com$") {
+                $containsMccorkleMember = $true
+                break
+            }
+        }
+
+        # If the group does not contain a member with the mccorklenurseries.com domain, add the group and its members to the result
+        if (!$containsMccorkleMember) {
+            foreach ($Member in $Members) {
                 # Create a new custom object with the group and member properties
                 $Result += New-Object PSObject -Property @{
                     'GroupName' = $Group.DisplayName # Display name of the group
@@ -195,13 +208,13 @@ function PullDistributionList {
             }
         }
     }
-    
-    
+
     Write-Host "List Saved to DistributionGroupsAndMembers CSV File"
     # Export the result array to a CSV file, without type information and using UTF-8 encoding
     $Result | Export-Csv -Path "$PSScriptRoot\DistributionGroupsAndMembers.csv" -NoTypeInformation -Encoding UTF8
     Read-Host -Prompt "Press any key to continue..."
 }
+
 
 
 #Define Pull License List function
