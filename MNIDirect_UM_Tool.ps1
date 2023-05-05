@@ -1,5 +1,6 @@
 # Set GitHub API URL to get the latest version of your script
-$apiUrl = "https://raw.githubusercontent.com/your-github-username/your-repo-name/main/your-script-name.ps1"
+
+$apiUrl = "https://raw.githubusercontent.com/spartan129/MNI-Direct/main/MNIDirect_UM_Tool.ps1"
 
 # Get the content of the script from GitHub
 $githubScriptContent = Invoke-WebRequest -Uri $apiUrl -UseBasicParsing
@@ -23,13 +24,16 @@ if ($githubScriptContent -and $githubScriptContent.Content) {
         Write-Host "The script has been updated to the latest version." -ForegroundColor Green
 
         # You can choose to restart the script after update by uncommenting the following line
-        # & $currentScriptPath
+
+        & $currentScriptPath
+
     } else {
         Write-Host "The script is already up-to-date." -ForegroundColor Green
     }
 } else {
     Write-Host "Failed to retrieve the script content from GitHub." -ForegroundColor Red
 }
+
 Write-Host 'Please complete both credential checks'
 
 # Check if the CredentialManager module is installed
