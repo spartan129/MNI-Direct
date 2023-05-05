@@ -23,13 +23,16 @@ if ($githubScriptContent -and $githubScriptContent.Content) {
         Write-Host "The script has been updated to the latest version." -ForegroundColor Green
 
         # You can choose to restart the script after update by uncommenting the following line
-        # & $currentScriptPath
+
+        & $currentScriptPath
+
     } else {
         Write-Host "The script is already up-to-date." -ForegroundColor Green
     }
 } else {
     Write-Host "Failed to retrieve the script content from GitHub." -ForegroundColor Red
 }
+
 Write-Host 'Please complete both credential checks'
 
 # Check if the CredentialManager module is installed
