@@ -1,5 +1,5 @@
 # Set GitHub API URL to get the latest version of your script
-$apiUrl = "https://raw.githubusercontent.com/your-github-username/your-repo-name/main/your-script-name.ps1"
+$apiUrl = "https://raw.githubusercontent.com/spartan129/MNI-Direct/be662fd4d16d8f9ce8c63842a8d80d9bce064d99/MNIDirect_UM_Tool.ps1"
 
 # Get the content of the script from GitHub
 $githubScriptContent = Invoke-WebRequest -Uri $apiUrl -UseBasicParsing
