@@ -484,9 +484,7 @@ function Main {
 }
 Main
 
-##Update offboarding to ask what address to forward emails to
 #NEEDED Function to remove all groups and BB/ BS from user
-#NEEDED Function to add/check credential saver
 #NEEDED Function log file with user output of changes
 #update function to accept usernames/ assign domain in script
 #update onboarding to accept abreviations BM NM SA
