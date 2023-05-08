@@ -247,10 +247,14 @@ function OffboardEmployee {
         $userEmail = Read-Host -Prompt "Email to be offboarded"
         $newPassword = Read-Host -Prompt "Enter the new password to be set"
 
-        # Display the username and password for confirmation
+        # Prompt for email forwarding address
+        $forwardingEmail = Read-Host -Prompt "Enter the email address to forward messages to"
+
+        # Display the username, password, and forwarding email for confirmation
         Write-Host "Please confirm the following information:"
         Write-Host "User email: $userEmail"
         Write-Host "New password: $newPassword"
+        Write-Host "Forwarding email: $forwardingEmail"
 
         # Ask for confirmation before proceeding
         $confirmation = Read-Host -Prompt "To proceed with offboarding, type 'Y'"
@@ -261,6 +265,9 @@ function OffboardEmployee {
             # Reset the user's password
             Write-Host "New user password is:"
             Set-MsolUserPassword -UserPrincipalName $userEmail -NewPassword $newPassword -ForceChangePassword $false
+
+            # Set email forwarding for the user
+            Set-Mailbox -Identity $userEmail -ForwardingSmtpAddress $forwardingEmail -DeliverToMailboxAndForward $false
 
             # Get the user's current licenses
             $user = Get-MsolUser -UserPrincipalName $userEmail
@@ -291,6 +298,7 @@ function OffboardEmployee {
 Write-Host "Offboarding complete."
 Read-Host -Prompt "Press any key to continue..."
 }
+
 
 #Function to Pull Distribution List function
 function PullDistributionList {
