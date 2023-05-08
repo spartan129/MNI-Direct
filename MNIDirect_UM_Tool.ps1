@@ -387,7 +387,6 @@ function DisplayDisclaimer {
     |____________________________________________|
 "@
 
-
     #clears screen
 	Clear-Host
 
@@ -478,7 +477,7 @@ function Main {
 }
 Main
 
-
+##Update offboarding to ask what address to forward emails to
 #NEEDED Function to remove all groups and BB/ BS from user
 #NEEDED Function to add/check credential saver
 #NEEDED Function log file with user output of changes
