@@ -1,5 +1,5 @@
-﻿#Function to check User Credentials and import security modules
-
+﻿#test
+#Function to check User Credentials and import security modules
 Function CredCheck{
     Write-Host 'Please complete both credential checks'
 
