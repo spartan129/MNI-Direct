@@ -193,7 +193,14 @@ function OnboardEmployee {
         $email = Read-Host -Prompt "Enter user's email address"
         $branch = Read-Host -Prompt "Enter user's branch number (42, 43, 44, or 45)"
         $position = Read-Host -Prompt "Enter user's position (Sales, Branch Manager, or Nursery Manager)"
-        $newPassword = 'Ch@ngeMe1!'
+        
+        # Check if user wants to set the default password
+        $useDefaultPassword = Read-Host -Prompt "Would you like to set the default password (Ch@nge1Me1!)? (Y/N)"
+        if ($useDefaultPassword.ToLower() -eq 'y') {
+            $newPassword = 'Ch@nge1Me1!'
+            Write-Host 'Setting default password...'
+            Set-MsolUserPassword -UserPrincipalName $email -NewPassword $newPassword -ForceChangePassword $false
+        }
         # Validate branch number
         $validBranches = @(42, 43, 44, 45)
         if (-not ($branch -in $validBranches)) {
@@ -225,10 +232,7 @@ function OnboardEmployee {
             }
         }
     Start-Sleep -Seconds 5
-    Write-Host "New user password is:"
     Set-MsolUser -UserPrincipalName $email -BlockCredential $false
-
-    Set-MsolUserPassword -UserPrincipalName $email -NewPassword $newPassword -ForceChangePassword $false
 
         $assignedGroups = $groupMapping[$position][$branch]
 
