@@ -1,4 +1,4 @@
-﻿#test
+﻿#test 123
 #Function to check User Credentials and import security modules
 Function CredCheck{
     Write-Host 'Please complete both credential checks'
@@ -83,34 +83,39 @@ function UpdateScript {
         # Set GitHub API URL to get the latest version of your script
         $apiUrl = "https://raw.githubusercontent.com/spartan129/MNI-Direct/main/MNIDirect_UM_Tool.ps1"
 
-        # Get the content of the script from GitHub
-        $githubScriptContent = Invoke-WebRequest -Uri $apiUrl -UseBasicParsing
+        try {
+            # Get the content of the script from GitHub
+            $githubScriptContent = Invoke-WebRequest -Uri $apiUrl -UseBasicParsing
 
-        # Check if the script content is not empty
-        if ($githubScriptContent -and $githubScriptContent.Content) {
-            $githubScriptContent = $githubScriptContent.Content
+            # Check if the script content is not empty
+            if ($githubScriptContent -and $githubScriptContent.Content) {
+                $githubScriptContent = $githubScriptContent.Content
 
-            # Get the path of the currently running script
-            $currentScriptPath = $MyInvocation.MyCommand.Path
+                # Get the path of the currently running script
+                $currentScriptPath = $MyInvocation.MyCommand.Path
 
-            # Get the content of the currently running script
-            $currentScriptContent = Get-Content -Path $currentScriptPath -Raw
+                # Get the content of the currently running script
+                $currentScriptContent = Get-Content -Path $currentScriptPath -Raw
 
-            # Compare the content of the GitHub script and the current script
-            if ($currentScriptContent -ne $githubScriptContent) {
-                # Update the current script with the content of the GitHub script
-                Set-Content -Path $currentScriptPath -Value $githubScriptContent
+                # Compare the content of the GitHub script and the current script
+                if ($currentScriptContent -ne $githubScriptContent) {
+                    # Update the current script with the content of the GitHub script
+                    Set-Content -Path $currentScriptPath -Value $githubScriptContent
 
-                # Show a message that the script has been updated
-                Write-Host "The script has been updated to the latest version." -ForegroundColor Green
+                    # Show a message that the script has been updated
+                    Write-Host "The script has been updated to the latest version." -ForegroundColor Green
 
-                # Close the script after updating
-                exit
+                    # Close the script after updating
+                    exit
+                } else {
+                    Write-Host "The script is already up-to-date." -ForegroundColor Green
+                }
             } else {
-                Write-Host "The script is already up-to-date." -ForegroundColor Green
+                Write-Host "Failed to retrieve the script content from GitHub." -ForegroundColor Red
+                exit
             }
-        } else {
-            Write-Host "Failed to retrieve the script content from GitHub." -ForegroundColor Red
+        } catch {
+            Write-Host "An error occurred while trying to check for updates: $_" -ForegroundColor Red
             exit
         }
     }
