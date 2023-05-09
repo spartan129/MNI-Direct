@@ -1,4 +1,4 @@
-﻿#123456
+﻿#test123
 #Function to check User Credentials and import security modules
 Function CredCheck{
     Write-Host 'Please complete both credential checks'
@@ -92,7 +92,7 @@ function UpdateScript {
                 $githubScriptContent = $githubScriptContent.Content
 
                 # Get the path of the currently running script
-                $currentScriptPath = $MyInvocation.MyCommand.Path
+                $currentScriptPath = $PSCommandPath
 
                 # Get the content of the currently running script
                 $currentScriptContent = Get-Content -Path $currentScriptPath -Raw
