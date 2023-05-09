@@ -1,4 +1,4 @@
-﻿#test 123
+﻿#123456
 #Function to check User Credentials and import security modules
 Function CredCheck{
     Write-Host 'Please complete both credential checks'
@@ -106,16 +106,19 @@ function UpdateScript {
                     Write-Host "The script has been updated to the latest version." -ForegroundColor Green
 
                     # Close the script after updating
+                    $confirmclose = Read-Host -Prompt "Press enter to close"
                     exit
                 } else {
                     Write-Host "The script is already up-to-date." -ForegroundColor Green
                 }
             } else {
                 Write-Host "Failed to retrieve the script content from GitHub." -ForegroundColor Red
+                $confirmclose = Read-Host -Prompt "Press enter to close"
                 exit
             }
         } catch {
             Write-Host "An error occurred while trying to check for updates: $_" -ForegroundColor Red
+            $confirmclose = Read-Host -Prompt "Press enter to close"
             exit
         }
     }
