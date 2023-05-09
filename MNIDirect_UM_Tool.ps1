@@ -100,7 +100,8 @@ function UpdateScript {
                 # Compare the content of the GitHub script and the current script
                 if ($currentScriptContent -ne $githubScriptContent) {
                     # Update the current script with the content of the GitHub script
-                    Set-Content -Path $currentScriptPath -Value $githubScriptContent
+                    Set-Content -Path $currentScriptPath -Value $githubScriptContent -Encoding UTF8
+
 
                     # Show a message that the script has been updated
                     Write-Host "The script has been updated to the latest version." -ForegroundColor Green
@@ -545,3 +546,4 @@ Main
 #update function to accept usernames/ assign domain in script
 #update onboarding to accept abreviations BM NM SA
 #make script able to add a csv of employees without emails in the email groups that should be removed
+
