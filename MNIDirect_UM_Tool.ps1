@@ -197,7 +197,7 @@ function OnboardEmployee {
         $position = Read-Host -Prompt "Enter user's position (Sales, Branch Manager, or Nursery Manager)"
         
         # Check if user wants to set the default password
-        $useDefaultPassword = Read-Host -Prompt "Would you like to set the default password (Ch@nge1Me1!)? (Y/N)"
+        $useDefaultPassword = Read-Host -Prompt "Would you like to set the default password(Ch@nge1Me1!)? (Y/N)"
         if ($useDefaultPassword.ToLower() -eq 'y') {
             $newPassword = 'Ch@nge1Me1!'
             Write-Host 'Setting default password...'
@@ -293,7 +293,7 @@ function OnboardEmployee {
     while ($continueOnboarding.ToLower() -eq 'y')
     Write-Host "Onboarding complete."
     Read-Host -Prompt "Press any key to continue..."
-    }
+}
 #Function to offboard users, but leaves emails and groups set
 function OffboardEmployee {
 
