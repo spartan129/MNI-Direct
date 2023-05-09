@@ -1,5 +1,4 @@
-﻿#test123
-#Function to check User Credentials and import security modules
+﻿#Function to check User Credentials and import security modules
 Function CredCheck{
     Write-Host 'Please complete both credential checks'
 
@@ -101,7 +100,6 @@ function UpdateScript {
                 if ($currentScriptContent -ne $githubScriptContent) {
                     # Update the current script with the content of the GitHub script
                     Set-Content -Path $currentScriptPath -Value $githubScriptContent -Encoding UTF8
-
 
                     # Show a message that the script has been updated
                     Write-Host "The script has been updated to the latest version." -ForegroundColor Green
