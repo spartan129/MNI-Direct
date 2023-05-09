@@ -118,6 +118,69 @@ function UpdateScript {
 
 #Function to set onboarding employee licenses and email groups
 function OnboardEmployee {
+    # Optimized groupMapping variable assignment
+    $commonEmails = @{
+        PurchasingATL = 'purchasing-atl@mnidirect.com'
+        Availability  = 'availability@mnidirect.com'
+        Safety        = 'safety@mnidirect.com'
+    }
+
+    $branches = @{
+        '42' = @{
+            Purchasing = $commonEmails.PurchasingATL
+            Branch     = 'branch42@mnidirect.com'
+            Managers   = 'br42managers@mnidirect.com'
+            Security   = 'br42security@mnidirect.com'
+        }
+        '43' = @{
+            Purchasing = 'br43purchasing@mnidirect.com'
+            Branch     = 'branch43@mnidirect.com'
+            Managers   = 'br43managers@mnidirect.com'
+            Security   = 'br43security@mnidirect.com'
+        }
+        '44' = @{
+            Purchasing = $commonEmails.PurchasingATL
+            Branch     = 'branch44@mnidirect.com'
+            Managers   = 'br44managers@mnidirect.com'
+            Security   = 'br44security@mnidirect.com'
+        }
+        '45' = @{
+            Purchasing = 'br45purchasing@mnidirect.com'
+            Branch     = 'branch45@mnidirect.com'
+            Managers   = 'br45managers@mnidirect.com'
+        }
+    }
+
+    $roles = @(
+        'Sales',
+        'Branch Manager',
+        'Nursery Manager'
+    )
+
+    $groupMapping = @{}
+
+    foreach ($role in $roles) {
+        $roleGroups = @{}
+        
+        foreach ($branchNumber in $branches.Keys) {
+            $branch = $branches[$branchNumber]
+            $emailGroup = @($branch.Purchasing, $branch.Branch)
+
+            if ($role -ne 'Sales') {
+                $emailGroup += @($commonEmails.Availability, $commonEmails.Safety, $branch.Managers)
+            }
+            
+            if ($role -eq 'Branch Manager' -or $role -eq 'Nursery Manager') {
+                if ($branch.Security) {
+                    $emailGroup += $branch.Security
+                }
+            }
+
+            $roleGroups[$branchNumber] = $emailGroup
+        }
+
+        $groupMapping[$role] = $roleGroups
+    }
 
     do {
 
@@ -151,7 +214,8 @@ function OnboardEmployee {
             $userLicenses = (Get-MsolUser -UserPrincipalName $email).Licenses.AccountSkuId
             if ($license -notin $userLicenses) {
                 Set-MsolUserLicense -UserPrincipalName $email -AddLicenses $license
-            } else {
+            } 
+            else {
                 Write-Host "User already has the $license license assigned. Skipping."
             }
         }
@@ -160,27 +224,7 @@ function OnboardEmployee {
     Set-MsolUser -UserPrincipalName $email -BlockCredential $false
 
     Set-MsolUserPassword -UserPrincipalName $email -NewPassword $newPassword -ForceChangePassword $false
-        # Assign email groups based on position and branch number
-        $groupMapping = @{
-            'Sales' = @{
-                '42' = @('purchasing-atl@mnidirect.com','branch42@mnidirect.com')
-                '43' = @('br43purchasing@mnidirect.com','branch43@mnidirect.com')
-                '44' = @('purchasing-atl@mnidirect.com','branch44@mnidirect.com')
-                '45' = @('br45purchasing@mnidirect.com','branch45@mnidirect.com')
-            }
-            'Branch Manager' = @{
-                '42' = @('br42managers@mnidirect.com','purchasing-atl@mnidirect.com','availability@mnidirect.com','safety@mnidirect.com','branch42@mnidirect.com','br42security@mnidirect.com')
-                '43' = @('br43managers@mnidirect.com','br43purchasing@mnidirect.com','availability@mnidirect.com','safety@mnidirect.com','branch43@mnidirect.com','br43security@mnidirect.com')
-                '44' = @('br44managers@mnidirect.com','purchasing-atl@mnidirect.com','availability@mnidirect.com','safety@mnidirect.com','branch44@mnidirect.com','br44security@mnidirect.com')
-                '45' = @('br45managers@mnidirect.com','br45purchasing@mnidirect.com','availability@mnidirect.com','safety@mnidirect.com','branch45@mnidirect.com')
-            }
-            'Nursery Manager' = @{
-                '42' = @('br42managers@mnidirect.com','purchasing-atl@mnidirect.com','availability@mnidirect.com','safety@mnidirect.com','branch42@mnidirect.com','br42security@mnidirect.com')
-                '43' = @('br43managers@mnidirect.com','br43purchasing@mnidirect.com','availability@mnidirect.com','safety@mnidirect.com','branch43@mnidirect.com','br43security@mnidirect.com')
-                '44' = @('br44managers@mnidirect.com','purchasing-atl@mnidirect.com','availability@mnidirect.com','safety@mnidirect.com','branch44@mnidirect.com','br44security@mnidirect.com')
-                '45' = @('br45managers@mnidirect.com','br45purchasing@mnidirect.com','availability@mnidirect.com','safety@mnidirect.com','branch45@mnidirect.com')
-            }
-        }
+
         $assignedGroups = $groupMapping[$position][$branch]
 
         if ($assignedGroups) {
@@ -203,7 +247,8 @@ function OnboardEmployee {
                     Add-DistributionGroupMember -Identity $allStaffGroup -Member $email -ErrorAction Stop
                     $groupAssigned = $true
                     Write-Host "User added to the $allStaffGroup group on attempt $tries."
-                } catch {
+                } 
+                catch {
                     Write-Host "Failed to add user to the $allStaffGroup group on attempt $tries. Retrying in 60 seconds..."
                     Start-Sleep -Seconds 60
                 }
@@ -213,14 +258,13 @@ function OnboardEmployee {
                 Write-Host "Failed to add user to the $allStaffGroup group after $maxTries attempts. Please check the user's email address and try again later."
             }
     
-            # Remove the allstaff group from the assigned groups as it has already been processed
-            #$assignedGroups = $assignedGroups | Where-Object { $_ -ne $allStaffGroup }
             
             foreach ($group in $assignedGroups) {
                 $groupMembers = Get-DistributionGroupMember -Identity $group | Select-Object -ExpandProperty PrimarySmtpAddress
                 if ($email -notin $groupMembers) {
                     Add-DistributionGroupMember -Identity $group -Member $email
-                } else {
+                } 
+                else {
                     Write-Host "User is already a member of the $group group. Skipping."
                 }
             }
@@ -234,11 +278,11 @@ function OnboardEmployee {
         Write-Host "User onboarding process completed successfully."
     
         $continueOnboarding = Read-Host -Prompt "Would you like to onboard another employee? (Y/N)"
-    } while ($continueOnboarding -eq 'Y' -or $continueOnboarding -eq 'y')
+    } 
+    while ($continueOnboarding.ToLower() -eq 'y')
     Write-Host "Onboarding complete."
     Read-Host -Prompt "Press any key to continue..."
     }
-
 #Function to offboard users, but leaves emails and groups set
 function OffboardEmployee {
 
