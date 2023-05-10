@@ -206,7 +206,7 @@ function OnboardEmployee {
         # Validate branch number
         $validBranches = @(42, 43, 44, 45)
         if (-not ($branch -in $validBranches)) {
-            Write-Host "Invalid branch number. Please provide a valid branch number (42, 43, 44, or 45)."
+            Write-Host "Invalid branch number. Please provide a valid branch number (42, 43, 44, or 45)"
             exit
         }
 
@@ -294,6 +294,7 @@ function OnboardEmployee {
     Write-Host "Onboarding complete."
     Read-Host -Prompt "Press any key to continue..."
 }
+
 #Function to offboard users, but leaves emails and groups set
 function OffboardEmployee {
 
@@ -350,10 +351,9 @@ function OffboardEmployee {
         $continueOffboarding = Read-Host -Prompt "Would you like to offboard another employee? Y/N"
     } while ($continueOffboarding -eq "Y" -or $continueOffboarding -eq "y")
 
-Write-Host "Offboarding complete."
-Read-Host -Prompt "Press any key to continue..."
+    Write-Host "Offboarding complete."
+    Read-Host -Prompt "Press any key to continue..."
 }
-
 
 #Function to Pull Distribution List function
 function PullDistributionList {
@@ -432,6 +432,7 @@ function PullLicenseList {
     Read-Host -Prompt "Press any key to continue..."
 
 }
+
 #Function to show Display Disclaimer
 function DisplayDisclaimer {
     $disclaimer = @"
@@ -460,10 +461,10 @@ function DisplayDisclaimer {
 }
 #Function to show a EULA
 function EULA{
-# Check for user agreement
-do {
-    $agreement = DisplayDisclaimer
-} while ($agreement -notmatch '^[Yy]$')
+    # Check for user agreement
+    do {
+        $agreement = DisplayDisclaimer
+    } while ($agreement -notmatch '^[Yy]$')
 }
 #Define Main function that defines the order of the script functions
 function Main {
