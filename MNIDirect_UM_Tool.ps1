@@ -9,7 +9,8 @@ Function CredCheck{
         Write-Host 'Credential Manager has been found. Skipping Login'
         $CredentialName = "MyExchangeOnlineCredential"
         $Credential = Get-StoredCredential -Target $CredentialName
-    } else {
+    } 
+    else {
         $Credential = Get-Credential
     }
 
@@ -28,6 +29,10 @@ Function CredCheck{
 
     # Connect to Exchange Online
     Connect-ExchangeOnline -Credential $Credential -ShowBanner:$false
+}
+Function BasicCredCheck{
+    Connect-MsolService
+    Connect-ExchangeOnline
 }
 
 #Function to set the background color and window size of the console
@@ -459,6 +464,7 @@ function DisplayDisclaimer {
 
     return $userAgreement
 }
+
 #Function to show a EULA
 function EULA{
     # Check for user agreement
@@ -469,9 +475,9 @@ function EULA{
 #Define Main function that defines the order of the script functions
 function Main {
     SetConsoleAppearance
-    CredCheck
+    BasicCredCheck
     EULA
-    UpdateScript
+    
 
     # Main loop
     do {
@@ -488,8 +494,8 @@ function Main {
     | |                                        | |   
     | |    1. Onboard Employee                 | |   
     | |    2. Offboard Employee                | |   
-    | |    3. Pull Distribution List           | |   
-    | |    4. Pull License List                | |   
+    | |    3. Pull Distro/License List         | |   
+    | |    4. Update Script                    | |   
     | |    5. Exit                             | |   
     | |                                        | |   
     | |========================================| |
@@ -521,9 +527,10 @@ function Main {
             }
             '3' {
                 PullDistributionList
+                PullLicenseList
             }
             '4' {
-                PullLicenseList
+                UpdateScript
             }
             '5' {
                 Write-Host "Exiting, have a wonderful day!..."
@@ -545,4 +552,5 @@ Main
 #update function to accept usernames/ assign domain in script
 #update onboarding to accept abreviations BM NM SA
 #make script able to add a csv of employees without emails in the email groups that should be removed
+
 
