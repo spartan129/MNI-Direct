@@ -182,7 +182,7 @@ function OnboardEmployee {
                 $emailGroup += @($commonEmails.Availability, $commonEmails.Safety, $branch.Managers)
             }
             
-            if ($role -eq 'Branch Manager' -or $role -eq 'Nursery Manager') {
+            if ($role -eq 'Branch Manager' -or $role -eq 'Nursery Manager' -or $role -eq 'Branch Support') {
                 if ($branch.Security) {
                     $emailGroup += $branch.Security
                 }
@@ -199,7 +199,7 @@ function OnboardEmployee {
         # Gather user information
         $email = Read-Host -Prompt "Enter user's email address"
         $branch = Read-Host -Prompt "Enter user's branch number (42, 43, 44, or 45)"
-        $position = Read-Host -Prompt "Enter user's position (Sales, Branch Manager, or Nursery Manager)"
+        $position = Read-Host -Prompt "Enter user's position (Sales, Branch Support, Branch Manager, or Nursery Manager)"
         
         # Check if user wants to set the default password
         $useDefaultPassword = Read-Host -Prompt "Would you like to set the default password(Ch@nge1Me1!)? (Y/N)"
@@ -329,7 +329,12 @@ function OffboardEmployee {
 
             # Set email forwarding for the user
             Set-Mailbox -Identity $userEmail -ForwardingSmtpAddress $forwardingEmail -DeliverToMailboxAndForward $false
-
+            # Remove the user from all email groups
+            $groups = Get-DistributionGroup -ResultSize Unlimited | Where-Object { Get-DistributionGroupMember -Identity $_.Identity | Where-Object { $_.PrimarySmtpAddress -eq $userEmail } }
+            foreach ($group in $groups) {
+                Remove-DistributionGroupMember -Identity $group.Identity -Member $userEmail -Confirm:$false
+                Write-Host "$userEmail removed from group: $($group.DisplayName)"
+            }
             # Get the user's current licenses
             $user = Get-MsolUser -UserPrincipalName $userEmail
             $currentLicenses = $user.Licenses.AccountSkuId
@@ -339,7 +344,7 @@ function OffboardEmployee {
                 "reseller-account:O365_BUSINESS_ESSENTIALS",
                 "reseller-account:O365_BUSINESS_PREMIUM"
             )
-
+            
             # Remove licenses except for the ones to keep
             foreach ($license in $currentLicenses) {
                 if ($license -notin $licensesToKeep) {
@@ -546,6 +551,7 @@ function Main {
     } while ($true)
 }
 Main
+
 
 #NEEDED Function to remove all groups and BB/ BS from user
 #NEEDED Function log file with user output of changes
