@@ -1,0 +1,21 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "MNI Development",
+            "request": "launch",
+            "type": "al",
+            "environmentType": "Sandbox",
+            "environmentName": "Development",
+            "breakOnError": true,
+            "startupObjectType": "Page",
+            "startupObjectId": 9304,
+            "launchBrowser": true,
+            "enableLongRunningSqlStatements": true,
+            "enableSqlInformationDebugger": true,
+            "tenant": "eb76e08c-2ef9-4e1d-8c21-e16183263cbc",
+            "schemaUpdateMode": "ForceSync"
+        }
+
+    ]
+}

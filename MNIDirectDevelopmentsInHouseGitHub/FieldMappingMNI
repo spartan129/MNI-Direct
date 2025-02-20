@@ -1,0 +1,5 @@
+// pageextension 50201 "Customer Card Extension"
+
+
+//field 50201; TestName1; Text[50])
+//field 50202; FeatureToggleTest; Boolean)

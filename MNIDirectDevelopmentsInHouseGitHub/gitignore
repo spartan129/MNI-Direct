@@ -1,0 +1,26 @@
+## --- AL gitignore ---
+## Ignores generated binary files and 
+## temporary files from Visual Studio and Visual Studio code
+
+# Binary files
+*.app
+!appfiles/*.app
+appfiles/*
+
+# Temp files
+.snapshots/
+.alcache/
+#.vscode/
+.vscode/.alcache/*
+.vscode/.altemplates/*
+
+# Others
+~$*
+*~
+
+**/rad.json
+launch.json 
+# settings.json
+# ruleset.json
+.vscode/ruleset.json
+.vscode/settings.json

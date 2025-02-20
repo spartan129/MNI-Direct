@@ -1,0 +1,104 @@
+{
+  "id": "530353df-6889-45f5-83fb-3d9f685f2889",
+  "name": "MNI Direct In-House Developments",
+  "publisher": "MNI",
+  "version": "25.2.1.2",
+  "brief": "Customization for MNI",
+  "description": "Customization for MNI",
+  "privacyStatement": "https://kopisusa.com",
+  "EULA": "https://kopisusa.com",
+  "help": "https://kopisusa.com",
+  "url": "https://kopisusa.com",
+  "logo": "assets/bc-briefcase.PNG",
+  "features": ["TranslationFile"],
+  "platform": "24.0.0.0",
+  "application": "24.0.0.0",
+  "dependencies": [    
+  {
+    "id": "adc18994-073b-4840-a144-2a5e3a0d9d1e",
+    "publisher": "Microsoft",
+    "name": "DIOT - Localization for Mexico",
+    "version": "18.5.29545.29684"
+  },
+  {
+    "id": "ec255f57-31d0-4ca2-b751-f2fa7c745abb",
+    "publisher": "Microsoft",
+    "name": "Shopify Connector",
+    "version": "23.3.14876.15414"
+  },
+  {
+    "id": "3d5b2137-efeb-4014-8489-41d37f8fd4c3",
+    "publisher": "Microsoft",
+    "name": "Late Payment Prediction",
+    "version": "19.2.32968.34436"
+  },
+  {
+    "id": "c526b3e9-b8ca-4683-81ba-fcd5f6b1472a",
+    "publisher": "Microsoft",
+    "name": "Sales and Inventory Forecast",
+    "version": "19.2.32968.34436"
+  },
+  {
+    "id": "7c7d97ca-3598-40f5-b263-f713f49bd2a5",
+    "publisher": "Microsoft",
+    "name": "Dynamics GP Historical Data",
+    "version": "23.5.16502.16887"
+  },
+  {
+"id": "6c2902a8-23e5-4289-9c7c-d345e2a328f5",
+"publisher": "Microsoft",
+"name": "Dynamics GP History SmartLists",
+"version": "23.5.16502.16887"
+  },
+  {
+    "id": "e6a22a66-7535-431e-89ae-263b9f76712d",
+    "publisher": "Sana Commerce",
+    "name": "Sana Commerce (NA)",
+    "version": "10.0.38.0"
+  },
+  {
+    "id": "7a129d06-5fd6-4fb6-b82b-0bf539c779d0",
+    "publisher": "Microsoft",
+    "name": "_Exclude_Bank Deposits",
+    "version": "21.0.0.0"
+  },
+  {
+    "id": "86caaff4-67ed-42d5-9f21-b8e6687ccd03",
+    "publisher": "PairSoft",
+    "name": "PaperSave for Dynamics 365 Business Central",
+    "version": "7.0.0.6"
+  },
+  {
+    "id": "9cf9feca-8d2d-49f3-a03d-6ae05f910b2c",
+    "publisher": "Abakion",
+    "name": "Abakion App Manager Core",
+    "version": "22.0.202318.6"
+  },
+  {
+    "id": "107d753a-96aa-464c-af78-1689720c1f91",
+    "publisher": "Abakion",
+    "name": "Search Items",
+    "version": "22.0.202321.6"
+  },
+
+  {
+    "id": "8f7cdd5f-1af2-4ec2-a1f3-ecb959ec395b",
+    "publisher": "iSolutions",
+    "name": "iPayments Credit Card & Collections",
+    "version": "23.23.11.101"
+  }
+  ],
+  "idRanges": [
+    {
+      "from": 50200,
+      "to": 50299
+    }
+  ],
+  "contextSensitiveHelpUrl": "https://SandboxWave2.com/help/",
+  "runtime": "13.0",
+  "resourceExposurePolicy": {
+    "allowDebugging": true,
+    "allowDownloadingSource": true,
+    "includeSourceInSymbolFile": true
+  }
+}
